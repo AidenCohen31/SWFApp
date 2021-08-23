@@ -1,0 +1,276 @@
+ <html>
+ 
+ <head>
+ <meta charset="UTF-8">
+ <meta name="author" content="Aiden Cohen">
+ <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+ <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">
+ 
+ <link rel="stylesheet" href="../static/css/styles.css">
+
+ </head>
+ 
+ 
+ 
+ <body class="bg-light">
+ 
+ <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"></script>
+ <script src="https://cdnjs.cloudflare.com/ajax/libs/js-cookie/2.2.1/js.cookie.min.js"></script>
+
+ <script>
+ document.addEventListener('DOMContentLoaded', function(){
+	axios.defaults.xsrfHeaderName=  Cookies.get('csrftoken');
+	console.log(Cookies.get('csrftoken'))
+	axios.defaults.withCredentials = true;
+ var modal = document.getElementById("myModal");
+ var tr = document.getElementsByName("table_row");
+ var rowclick = async function(event){
+	modal.style.display="block";
+	
+	document.getElementById("ordernumber").innerHTML = "Order Number: " + event.target.parentNode.children[1].innerHTML;
+	
+  var promise = await axios.get('getsubtotals', {
+  params: {
+    "orderid": event.target.parentNode.children[1].innerHTML,
+	"csrfmiddlewaretoken" : '{{csrf_token}}'
+  }
+}).catch(errors => console.log(errors));
+
+const datapromise = promise.data
+
+var html = "<table class='table'><thead><tr>";
+for (var value in datapromise[0]){
+	
+		//write headers as well
+		html+="<th scope='col'>" + value + "</th>";
+	}
+	html+="</tr><tbody>";
+for(var i = 0; i < Object.keys(datapromise).length; i++){
+	html+="<tr>";
+	for (var value in datapromise[i]){
+		html+="<td>" + datapromise[i][value]+"</td>";
+		
+	}
+			html+="</tr>";
+}
+html+="</tbody></table>";
+  
+  subtotalid = document.getElementById("subtotal-table");
+  subtotalid.innerHTML=html;
+	//make post request to server, server makes request to DB, then return that request here.
+
+ };
+ 
+ var btn = document.getElementById("close");
+ for(var i=0; i < tr.length; i++){
+ 
+ tr[i].addEventListener('click', rowclick);
+
+ }
+
+btn.onclick = function() {
+modal.style.display = "none";
+};
+
+window.onclick = function(event) {
+if (event.target == modal) {
+    modal.style.display = "none";
+  }
+};
+
+var params = new Object();   
+
+var sendReq = async function(){
+var url = new URL('loadview',window.location.href);
+url.search = new URLSearchParams(params).toString();
+window.location.replace(url.href);
+
+};
+
+$(".dropdown-menu a").click(function(){
+  
+  $("#submitbutton:first-child").html($(this).text()+' <span class="caret"></span>');
+  params.column = $(this).text()
+});
+
+$("#loadview").click(function(){
+
+
+	params.search = $("input[name='search']").val()
+	
+	if( params["column"] && params.search == ""){
+		alert("Please fill in the search field");
+	}
+	else{
+		
+		sendReq();
+		
+	}
+});
+
+	$('#leftgo','#rightgo').click(function(e){
+	
+	var clicked = $(e.target)
+	if(!params["page"]){
+		params.page = 0
+	}
+		if(clicked.attr('id') == '#leftgo'){
+		
+			params.page-=(params.page == 0 ? 0 : params.page-1)
+		}
+		else{
+			params.page+= 1
+			//make sure this doesn't overflow I think i add another context that's just hidden metadata. Woudl be useful.
+		}
+	sendReq();
+
+});
+
+
+
+
+});
+
+
+ 
+ </script>
+ 
+ <!-- The Modal -->
+
+ 
+<nav class="navbar-custom py-5">
+ <h1 class="col-auto"> Regression Testing Visual Tool </h1>
+
+</nav>
+
+ <div id= "settings-bar" class="container-fluid mt-4 justify-content-start"> 
+ 
+ <div class="row">
+ <div class="col container-fluid">
+<h3 class="ml-2"> Settings </h3>
+<br/>
+</div>
+</div>
+
+<div class="row">
+<div class = "col container-fluid">
+ <div class="form-row">
+ <div class="col-auto">
+ <div class="input-group">
+  <div class="input-group-prepend">
+  	 <div class="dropdown">
+  <button type="button" id="submitbutton" class="btn-lg btn-danger dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+    Action
+  </button>
+  <div id="dropdown" class="dropdown-menu" aria-labelledby="submitbutton">
+			{%for header in fieldnames%}
+    <a class="dropdown-item" id={{header}}>{{header}}</a>
+	{%endfor%}
+   <!-- <a class="dropdown-item" href="#">Separated link</a> use this if it comes in handy-->
+  </div>
+</div>
+    </div>
+	<input type="text" name="search"  class="form-control"id="exampleInputEmail1" placeholder="Enter search terms" aria-describedby="basic-addon1">
+</div>
+</div>
+<div class= "form-group ">
+<div class="col-auto">
+	<svg  id="leftgo" xmlns="http://www.w3.org/2000/svg" width="55" height="50" fill="green" class="bi bi-arrow-left-square-fill" viewBox="0 0 16 16">
+  <path d="M16 14a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12zm-4.5-6.5H5.707l2.147-2.146a.5.5 0 1 0-.708-.708l-3 3a.5.5 0 0 0 0 .708l3 3a.5.5 0 0 0 .708-.708L5.707 8.5H11.5a.5.5 0 0 0 0-1z"/>
+</svg>
+</div>
+</div>
+<div class="form-group ">
+<div class="col-container-fluid" >
+<svg id="rightgo" xmlns="http://www.w3.org/2000/svg" width="55" height="50" fill="green" class="bi bi-arrow-right-square-fill" viewBox="0 0 16 16">
+  <path d="M0 14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2a2 2 0 0 0-2 2v12zm4.5-6.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5a.5.5 0 0 1 0-1z"/>
+</svg>
+</div>
+</div>
+<div class="form-group">
+<div class="col-auto">
+  <button id="loadview" class="btn-lg btn-primary">Load View</button>
+</div>
+</div>
+</div>
+
+</div>
+
+</div>
+
+ <div id="tablesql" class="d-flex ">
+
+ <div class="col">
+ <table class="table table-bordered table-hover mt-5">
+ <thead class="thead-light">
+ 
+ <tr>
+ {%for header in fieldnames%}
+    <th scope="col">
+	<div class="d-flex justify-content-between">
+	<div> {{header}} </div>   
+	<span class="p-2 bi-caret-down-fill"></span> 
+	</div>
+	</th>
+	  {% endfor %}
+  </tr>
+
+ </thead>
+
+ <tbody>
+  {%for data in alldata%}
+  {%if data.LineNumber != 2%}
+  <tr name="table_row">
+  {%for key,value in data.items%}
+    <td>{{value}}</td>
+	{%endfor%}
+  </tr>
+  
+  {% else %}
+    <tr name="table_row" class="table-danger">
+  {%for key,value in data.items%}
+    <td >{{value}}</td>
+	{%endfor%}
+  </tr>
+  {% endif %}
+    {% endfor %}
+	
+  </tbody>
+
+</table>
+</div>
+</div>
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ </body>
+ 
+
+ 
+  
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ </html>
