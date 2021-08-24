@@ -842,7 +842,7 @@ $(".table-name").each(function(index){
 if($(this).children().eq(0).text().trim() == "{{target}}"){
 
 $(this).css("background-color","#3aafdc")
-
+$(".table-container").get(0).scroll(0,$(this).get(0).getBoundingClientRect().top-200)
 }
 }
 
