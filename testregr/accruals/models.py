@@ -37,6 +37,7 @@ class AccrualD(models.Model):
     AccrualType = models.CharField(max_length=15, db_column="ACTYPE_AccrualType")
     InEffectiveDate = models.DecimalField(max_digits=8,decimal_places=0, db_column="ACEFFI_InEffectiveDate")
     OutEffectiveDate = models.DecimalField(max_digits=8,decimal_places=0, db_column="ACEFFO_OutEffectiveDate")
+    InvoiceByDate = models.DecimalField(max_digits=8,decimal_places=0,db_column="ACINVBY_InvoiceByDate")
     AmtPerLine = models.DecimalField(max_digits=15, decimal_places =2, db_column="ACLINE$_AmtPerLine")
     AmtPerUnit = models.DecimalField(max_digits=15, decimal_places =2, db_column="ACUNIT$_AmtPerUnit")
     CostPercent = models.DecimalField(max_digits = 3, decimal_places = 2, db_column="ACCOSTP_CostPercent")

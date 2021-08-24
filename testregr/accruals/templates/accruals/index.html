@@ -197,6 +197,7 @@ tr:first-child {
 <input type="date" name="OutDate" class="form-control form2" id="Outdaterul" placeholder="" data-bs-toggle="popover"  data-bs-placement="top" title="Out Effective Date">
 
 </div>
+
   </div>
   <div class="row justify-content-end">
 <div class="col-auto">
@@ -386,6 +387,11 @@ tr:first-child {
 <input type="date" class="form-control form3" id="OutdateUpdate" placeholder="" data-bs-toggle="popover"  data-bs-placement="top" title="Out Effective Date">
 
 </div>
+<div class="d-flex col-auto align-items-center">
+
+<input type="date" name="InvoiceByDate" class="form-control form3" id="Invbydate" placeholder="" data-bs-toggle="popover"  data-bs-placement="top" title="Invoice By Date">
+
+</div>
 <div class="col-auto">
  <div class="form-floating">
   <input type="text" class="form-control form3" id="amtlineUpdate" placeholder="Amt per Line">
@@ -526,6 +532,11 @@ tr:first-child {
 <div class="d-flex col-auto align-items-center">
 
 <input type="date" class="form-control form1" id="Outdate" placeholder="" data-bs-toggle="popover"  data-bs-placement="top" title="Out Effective Date">
+
+</div>
+<div class="d-flex col-auto align-items-center">
+
+<input type="date" name="InvoiceByDate" class="form-control form1" id="upInvbydate" placeholder="" data-bs-toggle="popover"  data-bs-placement="top" title="Invoice By Date">
 
 </div>
 <div class="col-auto">
@@ -850,7 +861,7 @@ $(".table-container").get(0).scroll(0,$(this).get(0).getBoundingClientRect().top
 );
 });
 
-var lists = ["Indate", "Outdate","Indaterul","Outdaterul","IndateUpdate","OutdateUpdate","upIndaterul","upoutdaterul"]
+var lists = ["Indate", "Outdate","Indaterul","Outdaterul","IndateUpdate","OutdateUpdate","upIndaterul","upoutdaterul","Invbydate","upInvbydate"]
 var poppers = []
 for(let i = 0; i < lists.length; i++){
 poppers.push(new bootstrap.Popover(document.getElementById(lists[i])));
@@ -1079,11 +1090,11 @@ let otherlists = $(newView)
 if(newView == ".form3"){
 for(let i = 0; i < otherlists.length; i++){
 
-if(i == 2 || i==3){
+if(i == 2 || i==3 || i==4){
 let temp = lists.eq(i).text();
 otherlists.eq(i).val(temp.substring(0,4) + "-" + temp.substring(4,6) + "-" + temp.substring(6,8))
 }
-else if([4,5,6,7].includes(i)){
+else if([5,6,7,8].includes(i)){
 const regex = /^(?:[0]|[^1-9]+)$/;
 if(lists.eq(i).text().match(regex) != null){
 otherlists.eq(i).val("")
@@ -1101,7 +1112,7 @@ else{
 for(let i = 0; i < otherlists.length; i++){
 
 
-if(i == 9 || i==10){
+if(i == 9 || i==10 ){
 let temp = lists.eq(i).text();
 otherlists.eq(i).val(temp.substring(0,4) + "-" + temp.substring(4,6) + "-" + temp.substring(6,8))
 
@@ -1130,7 +1141,6 @@ $('.update-form').submit(function(e){
 e.preventDefault();
 let num = $(this).attr("id") == "rul-update-form" ? 4 : 3;
 validations("updatevalidate",num).then ((data) =>{
-console.log(data);
 if(!data){
 return false;
 }
@@ -1240,7 +1250,6 @@ function download(filename, text) {
 }
 
 $("#spinput").change(function(e){
-console.log("hello")
 formdata = new FormData();
 let view = "definition";
 formdata.append("view", "definition" );
@@ -1358,7 +1367,7 @@ else{
 params[entry[0]] = (entry[0] in params ? params[entry[0]] : [entry[1]] )
 }
 }
-console.log(params)
+
 $.ajax({
 type:"GET",
 data: params,
@@ -1366,7 +1375,7 @@ url:"/accruals/"
 }).done(function(data){
 temphtml = $($.parseHTML(data)).find('.container .table')
 
-console.log(temphtml.html())
+
 $(".container .table").html(temphtml.html())
 
 let url = new URL('',window.location.href);
@@ -1421,7 +1430,7 @@ if(j != 0 && !urlParams.getAll(options[j-1]).includes(vals)){
 urlParams.append(options[j-1],vals);
 const strings = (j == 1 ? "desc":"asc");
 if(urlParams.get(strings) && urlParams.get(strings).includes(vals)){
-console.log("hello")
+
 const arrays = urlParams.getAll(strings)
 arrays.splice(urlParams.getAll(strings).indexOf(vals),1);
 if(arrays.length == 0){

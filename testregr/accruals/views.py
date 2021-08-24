@@ -125,12 +125,12 @@ def validate(request):
         returndict = {0: ["accName",[]],
                       2: ["Indate",[]],
                       3: ["Outdate",[]],
-                      4: ["amtline",[]],
-                      5: ["amtunit", []],
-                      6: ["costpercent",[]],
-                      7: ["pricepercent",[]],
-                      9:["annual",[]],
-                      8:["monthly",[]]}
+                      5: ["amtline",[]],
+                      6: ["amtunit", []],
+                      7: ["costpercent",[]],
+                      8: ["pricepercent",[]],
+                      10:["annual",[]],
+                      9:["monthly",[]]}
        
         if(request.session.get('error',False)):
                 returndict[0][1].append("Error: Form Submitted with empty values")
@@ -141,27 +141,27 @@ def validate(request):
                 returndict[0][1].append("Error: duplicate accrual name")
         if( data[2] != "" and data[3] != "" and int(data[2].replace("-","")) > int(data[3].replace("-",""))):
             returndict[2][1].append("Error: InEffectiveDate larger than OutEffectiveDate")
-        if(data[4] != "" and not data[4].replace('.','').isnumeric()):
-            returndict[4][1].append("Error: amt per line is not numeric")
         if(data[5] != "" and not data[5].replace('.','').isnumeric()):
-            returndict[5][1].append("Error: amt per unit is not numeric")
+            returndict[5][1].append("Error: amt per line is not numeric")
         if(data[6] != "" and not data[6].replace('.','').isnumeric()):
-            returndict[6][1].append("Error: percent of cost is not numeric")
+            returndict[6][1].append("Error: amt per unit is not numeric")
         if(data[7] != "" and not data[7].replace('.','').isnumeric()):
-            returndict[7][1].append("Error: percent of price is not numeric")
-        if(data[6] != "" and (float(data[6])/100 >= 10 or float(data[6])/100 <= -10)):
-            returndict[6][1].append("Error: percent of cost is too big")
-        if(data[7] != "" and (float(data[7])/100 >= 10  or float(data[7])/100 <= -10)):
-            returndict[7][1].append("Error: percent of price is too big")
-        if(checklength(data[4:8],"") < 3):
-            returndict[4][1].append("Error: Only 1/4 fields can be specified")
+            returndict[7][1].append("Error: percent of cost is not numeric")
+        if(data[8] != "" and not data[8].replace('.','').isnumeric()):
+            returndict[8][1].append("Error: percent of price is not numeric")
+        if(data[7] != "" and (float(data[7])/100 >= 10 or float(data[7])/100 <= -10)):
+            returndict[7][1].append("Error: percent of cost is too big")
+        if(data[8] != "" and (float(data[8])/100 >= 10  or float(data[8])/100 <= -10)):
+            returndict[8][1].append("Error: percent of price is too big")
+        if(checklength(data[5:9],"") < 3):
             returndict[5][1].append("Error: Only 1/4 fields can be specified")
             returndict[6][1].append("Error: Only 1/4 fields can be specified")
             returndict[7][1].append("Error: Only 1/4 fields can be specified")
-        if(data[8] != "" and not data[8].replace('.','').isnumeric()):
-            returndict[8][1].append("Error: monthly max is not numeric")
+            returndict[8][1].append("Error: Only 1/4 fields can be specified")
         if(data[9] != "" and not data[9].replace('.','').isnumeric()):
-            returndict[9][1].append("Error: annual max is not numeric")
+            returndict[9][1].append("Error: monthly max is not numeric")
+        if(data[10] != "" and not data[10].replace('.','').isnumeric()):
+            returndict[10][1].append("Error: annual max is not numeric")
         return JsonResponse(returndict)
     else:
         returndict = {
@@ -204,7 +204,7 @@ def insert(request):
         objs = AccrualD()
         j = 0
         for i in AccrualD._meta.get_fields():
-            if(i.name == "InEffectiveDate" or i.name =="OutEffectiveDate"):
+            if(i.name == "InEffectiveDate" or i.name =="OutEffectiveDate"or i.name == "InvoiceByDate"):
                 strs = data[j]
                 data[j] = strs.replace("-","")
             if(i.name == "CostPercent" or i.name == "PricePercent"):
@@ -325,27 +325,27 @@ def validateupdate(request):
                 returndict[0][1].append("Error: accrual name does not exist")
         if( data[2] != "" and data[3] != "" and int(data[2].replace("-","")) > int(data[3].replace("-",""))):
             returndict[2][1].append("Error: InEffectiveDate larger than OutEffectiveDate")
-        if(data[4] != "" and not data[4].replace('.','').isnumeric()):
-            returndict[4][1].append("Error: amt per line is not numeric")
         if(data[5] != "" and not data[5].replace('.','').isnumeric()):
-            returndict[5][1].append("Error: amt per unit is not numeric")
+            returndict[5][1].append("Error: amt per line is not numeric")
         if(data[6] != "" and not data[6].replace('.','').isnumeric()):
-            returndict[6][1].append("Error: percent of cost is not numeric")
+            returndict[6][1].append("Error: amt per unit is not numeric")
         if(data[7] != "" and not data[7].replace('.','').isnumeric()):
-            returndict[7][1].append("Error: percent of price is not numeric")
-        if(data[6] != "" and (float(data[6])/100 >= 10 or float(data[6])/100 <= -10)):
-            returndict[6][1].append("Error: percent of cost is too big")
+            returndict[7][1].append("Error: percent of cost is not numeric")
+        if(data[8] != "" and not data[8].replace('.','').isnumeric()):
+            returndict[8][1].append("Error: percent of price is not numeric")
         if(data[7] != "" and (float(data[7])/100 >= 10 or float(data[7])/100 <= -10)):
-            returndict[7][1].append("Error: percent of price is too big")
-        if(checklength(data[4:8],"") < 3):
-            returndict[4][1].append("Error: Only 1/4 fields can be specified")
+            returndict[7][1].append("Error: percent of cost is too big")
+        if(data[8] != "" and (float(data[8])/100 >= 10  or float(data[8])/100 <= -10)):
+            returndict[8][1].append("Error: percent of price is too big")
+        if(checklength(data[5:9],"") < 3):
             returndict[5][1].append("Error: Only 1/4 fields can be specified")
             returndict[6][1].append("Error: Only 1/4 fields can be specified")
             returndict[7][1].append("Error: Only 1/4 fields can be specified")
-        if(data[8] != "" and not data[8].replace('.','').isnumeric()):
-            returndict[8][1].append("Error: monthly max is not numeric")
+            returndict[8][1].append("Error: Only 1/4 fields can be specified")
         if(data[9] != "" and not data[9].replace('.','').isnumeric()):
-            returndict[9][1].append("Error: annual max is not numeric")
+            returndict[9][1].append("Error: monthly max is not numeric")
+        if(data[10] != "" and not data[10].replace('.','').isnumeric()):
+            returndict[10][1].append("Error: annual max is not numeric")
         return JsonResponse(returndict)
     else:
         returndict = {
@@ -381,7 +381,7 @@ def update(request):
         objs = AccrualD()
         j = 0
         for i in AccrualD._meta.get_fields():
-            if(i.name == "InEffectiveDate" or i.name =="OutEffectiveDate"):
+            if(i.name == "InEffectiveDate" or i.name =="OutEffectiveDate" or i.name == "InvoiceByDate"):
                 strs = data[j]
                 data[j] = strs.replace("-","")
             if(i.name == "CostPercent" or i.name == "PricePercent"):
