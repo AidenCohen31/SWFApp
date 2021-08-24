@@ -150,9 +150,9 @@ def validate(request):
             returndict[6][1].append("Error: percent of cost is not numeric")
         if(data[7] != "" and not data[7].replace('.','').isnumeric()):
             returndict[7][1].append("Error: percent of price is not numeric")
-        if(data[6] != "" and (int(data[6]) >= 10 or int(data[6]) <= -10)):
+        if(data[6] != "" and (int(data[6])/100 >= 10 or int(data[6])/100 <= -10)):
             returndict[6][1].append("Error: percent of cost is too big")
-        if(data[7] != "" and (int(data[7]) >= 10     or int(data[7]) <= -10)):
+        if(data[7] != "" and (int(data[7])/100 >= 10     or int(data[7])/100 <= -10)):
             returndict[7][1].append("Error: percent of price is too big")
         if(checklength(data[4:8],"") < 3):
             returndict[4][1].append("Error: Only 1/4 fields can be specified")
@@ -208,6 +208,10 @@ def insert(request):
             if(i.name == "InEffectiveDate" or i.name =="OutEffectiveDate"):
                 strs = data[j]
                 data[j] = strs.replace("-","")
+            if(i.name == "CostPercent" or i.name == "PricePercent"):
+                if(data[j] != ""):
+                    nums = float(data[j])
+                    data[j] = nums/100.0
             if(j >= len(data) or data[j] == ""):
                 if(i.get_internal_type() == "DecimalField"):
                     setattr(objs,i.name,0)
@@ -330,9 +334,9 @@ def validateupdate(request):
             returndict[6][1].append("Error: percent of cost is not numeric")
         if(data[7] != "" and not data[7].replace('.','').isnumeric()):
             returndict[7][1].append("Error: percent of price is not numeric")
-        if(data[6] != "" and (int(data[6]) >= 10 or int(data[6]) <= -10)):
+        if(data[6] != "" and (int(data[6])/100 >= 10 or int(data[6])/100 <= -10)):
             returndict[6][1].append("Error: percent of cost is too big")
-        if(data[7] != "" and (int(data[7]) >= 10 or int(data[7]) <= -10)):
+        if(data[7] != "" and (int(data[7])/100 >= 10 or int(data[7])/100 <= -10)):
             returndict[7][1].append("Error: percent of price is too big")
         if(checklength(data[4:8],"") < 3):
             returndict[4][1].append("Error: Only 1/4 fields can be specified")
@@ -381,6 +385,10 @@ def update(request):
             if(i.name == "InEffectiveDate" or i.name =="OutEffectiveDate"):
                 strs = data[j]
                 data[j] = strs.replace("-","")
+            if(i.name == "CostPercent" or i.name == "PricePercent"):
+                if(data[j] != ""):
+                    nums = float(data[j])
+                    data[j] = nums/100.0
             if(j >= len(data) or data[j] == ""):
                 if(i.get_internal_type() == "DecimalField"):
                     setattr(objs,i.name,0)
