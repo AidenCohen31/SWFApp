@@ -135,7 +135,6 @@ def validate(request):
         if(request.session.get('error',False)):
                 returndict[0][1].append("Error: Form Submitted with empty values")
                 request.session['error'] = False
-                
         if(data[0] != ""):
             quer = AccrualD.objects.using('Accrual').filter(AccrualName=data[0])
             if quer.exists():
@@ -150,9 +149,9 @@ def validate(request):
             returndict[6][1].append("Error: percent of cost is not numeric")
         if(data[7] != "" and not data[7].replace('.','').isnumeric()):
             returndict[7][1].append("Error: percent of price is not numeric")
-        if(data[6] != "" and (int(data[6])/100 >= 10 or int(data[6])/100 <= -10)):
+        if(data[6] != "" and (float(data[6])/100 >= 10 or float(data[6])/100 <= -10)):
             returndict[6][1].append("Error: percent of cost is too big")
-        if(data[7] != "" and (int(data[7])/100 >= 10     or int(data[7])/100 <= -10)):
+        if(data[7] != "" and (float(data[7])/100 >= 10  or float(data[7])/100 <= -10)):
             returndict[7][1].append("Error: percent of price is too big")
         if(checklength(data[4:8],"") < 3):
             returndict[4][1].append("Error: Only 1/4 fields can be specified")
@@ -334,9 +333,9 @@ def validateupdate(request):
             returndict[6][1].append("Error: percent of cost is not numeric")
         if(data[7] != "" and not data[7].replace('.','').isnumeric()):
             returndict[7][1].append("Error: percent of price is not numeric")
-        if(data[6] != "" and (int(data[6])/100 >= 10 or int(data[6])/100 <= -10)):
+        if(data[6] != "" and (float(data[6])/100 >= 10 or float(data[6])/100 <= -10)):
             returndict[6][1].append("Error: percent of cost is too big")
-        if(data[7] != "" and (int(data[7])/100 >= 10 or int(data[7])/100 <= -10)):
+        if(data[7] != "" and (float(data[7])/100 >= 10 or float(data[7])/100 <= -10)):
             returndict[7][1].append("Error: percent of price is too big")
         if(checklength(data[4:8],"") < 3):
             returndict[4][1].append("Error: Only 1/4 fields can be specified")

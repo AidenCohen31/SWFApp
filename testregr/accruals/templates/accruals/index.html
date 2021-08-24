@@ -1358,8 +1358,21 @@ else{
 params[entry[0]] = (entry[0] in params ? params[entry[0]] : [entry[1]] )
 }
 }
+console.log(params)
+$.ajax({
+type:"GET",
+data: params,
+url:"/accruals/"
+}).done(function(data){
+temphtml = $($.parseHTML(data)).find('.container .table')
 
-sendReq(params);
+console.log(temphtml.html())
+$(".container .table").html(temphtml.html())
+
+let url = new URL('',window.location.href);
+url.search = new URLSearchParams(params).toString();
+window.history.pushState("","load",url.href);
+});
 }
 
 
