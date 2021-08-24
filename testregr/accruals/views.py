@@ -9,7 +9,7 @@ from io import StringIO
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
 from collections import defaultdict
-
+from django.db.models import Max
 # Create your views here.
 
 def index(request):
@@ -599,8 +599,18 @@ def inputs(request):
     
 def writeinputs(request):
     print(request.POST)
-    ids = request.POST['id'][0]
-    data = request.POST['arr[]']
-    objs = Dropdown(ids = ids, view_name = data[1], entry_name = data[2], value_name=data[3])
+    ids = request.POST.getlist('id')[0]
+    data = request.POST.getlist('arr[]')
+    print(data)
+    if(data == ['','',''] and ids != ''):
+        objs = Dropdown(ids = ids, view_name = data[0], entry_name = data[1], value_name=data[2])
+        objs.delete()
+        return HttpResponse()
+    elif(data == ['','',''] and ids == ''):
+        return HttpResponse()
+    if(ids == ''):
+        objs = Dropdown(view_name = data[0], entry_name = data[1], value_name=data[2])
+    else:
+        objs = Dropdown(ids = ids, view_name = data[0], entry_name = data[1], value_name=data[2])
     objs.save()
     return HttpResponse()

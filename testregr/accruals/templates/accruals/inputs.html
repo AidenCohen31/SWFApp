@@ -36,6 +36,7 @@
 
 
 </header>
+<a href="/accruals/" role="button" class="btn btn-primary btn-lg">Return to Accruals</a>
 
 <table class="table table-bordered">
 
@@ -92,7 +93,7 @@ $("input").change(function(e){
 arr = $(this).closest('tr').children().map(function(){return $(this).find("input").val()})
 arr = $.makeArray(arr);
 id = $(this).closest('tr').children().eq(0).text().trim()
-
+console.log(arr)
 if(jQuery.inArray("add-row",$(this).attr('class').split(" ")) == -1){
 
 $.ajax({
@@ -102,13 +103,12 @@ type: "POST",
 data: {"id" : id, "arr":arr, "csrfmiddlewaretoken": "{{csrf_token}}"},
 success: function(e){
 
-console.log("hi");
+location.reload();
 
 }
 
 
 });
-
 }
 
 else{
@@ -118,21 +118,65 @@ $.ajax({
 
 url: "writeinputs",
 type: "POST",
-data: {"id" : id, "arr":arr},
+data: {"id" : id, "arr":arr,"csrfmiddlewaretoken": "{{csrf_token}}"},
 error : function(e){
 
 console.log(e);
 
+},
+success : function(e){
+location.reload();
 }
 
 
 });
-
 }
 
 }
+temp = ["","",""]
+bools = true;
+for(let i = 0; i < arr.length; i++){
+if(temp[i] != arr[i]){
+bools = false;
+}
+
+}
+if(bools){
+console.log("hi");
+$.ajax({
+
+url: "writeinputs",
+type: "POST",
+data: {"id" : id, "arr":arr,"csrfmiddlewaretoken": "{{csrf_token}}"},
+error : function(e){
+
+console.log(e);
+
+},
+success : function(e){
+location.reload();
+}
 
 
+});
+}
+
+});
+
+$("input").keypress(function(event){
+
+if(event.which == '13'){
+row = $(this).closest('tr').children()
+for(let i = 0; i < row.length; i++){
+if(row.eq(i).find('input').is($(this)) && i != row.length -1){
+
+row.eq(i+1).find('input').focus();
+}
+else if(row.eq(i).find('input').is($(this)) && i == row.length-1){
+$(this).closest('tr').next('tr').children().eq(1).find('input').focus();
+}
+}
+}
 
 
 });

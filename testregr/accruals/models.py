@@ -58,7 +58,7 @@ class AccrualD(models.Model):
         
         
 class Dropdown(models.Model):
-    ids = models.IntegerField(primary_key=True, db_column="id")
+    ids = models.AutoField(primary_key=True, db_column="id")
     view_name = models.CharField(max_length=50)
     entry_name = models.CharField(max_length=50)
     value_name = models.CharField(max_length=50)
