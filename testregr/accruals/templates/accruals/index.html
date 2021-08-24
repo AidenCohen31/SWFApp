@@ -728,7 +728,7 @@ tr:first-child {
 
 
 </div>
-<div class=" container table-container mt-3 mr-2" style="border-left: solid;">
+<div class=" container table-container rules-container mt-3 mr-2" style="border-left: solid;">
 	  <div class="" style="display:block;" >
   	<div class="row">
 <div class="col-auto">
@@ -859,6 +859,9 @@ $(".table-container").get(0).scroll(0,$(this).get(0).getBoundingClientRect().top
 
 
 );
+
+
+$("#ruleselect").val("{{target}}")
 });
 
 var lists = ["Indate", "Outdate","Indaterul","Outdaterul","IndateUpdate","OutdateUpdate","upIndaterul","upoutdaterul","Invbydate","upInvbydate"]
@@ -1010,21 +1013,7 @@ setTimeout(function(){window.scrollTo(0,realheight);
 },300)
 }
 });
-var sendReq = async function(params){
-let url = new URL('',window.location.href);
-url.search = new URLSearchParams(params).toString();
-window.location.replace(url.href);
 
-};
-
-$("#switchView").on("click", function(e){
-let currentView = document.getElementById("holder").classList[0]
-let newView = (currentView == "definition" ? "rules" : "definition");
-let params = {"view":newView, 'csrfmiddlewaretoken': "{{csrf_token}}"};
-
-sendReq(params);
-
-});
 
 $("#nolimit").on('change', function(e){
 
@@ -1328,21 +1317,21 @@ modal.style.display = "none";
 
 });
 
-$(".condition-button").click( function(e){
+$(".rules-container").on("click",".condition-button", function(e){
 $("#rul-form")[0].reset();
 $("#myModal").css("display","block");
 var number = $(this).attr("name").split(" ")
-$("#accselect").val("{{target}}".trim())
+$("#accselect").val($("#ruleselect").val())
 $('#accselect').trigger('change');
 $("#rulenum").val(number[0]);
 $("#ruleseq").val(number[1]);
 
 });
 
-$(".rule-button").click( function(e){
+$(".rules-container").on("click",".rule-button", function(e){
 $("#rul-form")[0].reset();
 $("#myModal").css("display","block");
-$("#accselect").val("{{target}}")
+$("#accselect").val($("#ruleselect").val())
 $('#accselect').trigger('change');
 $("#rulenum").val("{{nextrule}}");
 $("#ruleseq").val("1");
@@ -1381,9 +1370,9 @@ $(".container .table").html(temphtml.html())
 let url = new URL('',window.location.href);
 url.search = new URLSearchParams(params).toString();
 window.history.pushState("","load",url.href);
-});
-}
 
+})
+}
 
 });
 

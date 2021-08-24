@@ -254,7 +254,7 @@ def validatepost(request):
     data = dict(request.POST.lists()).get("data[]")
     view = dict(request.POST.lists()).get("view")[0]
 
-    exclude = [4,5,6,7] if view == "definition" else []
+    exclude = [5,6,7,8] if view == "definition" else []
     print(data)
     for i in range(len(data)):
         if(data[i] == "" and not i in exclude):
@@ -267,7 +267,7 @@ def validatepost(request):
 def updatevalidatepost(request):
     data = dict(request.POST.lists()).get("data[]")
     view = dict(request.POST.lists()).get("view")[0]
-    exclude = [4,5,6,7] if view == "definition" else [4,5,6]
+    exclude = [5,6,7,8] if view == "definition" else [4,5,6]
     
     for i in range(len(data)):
         if(data[i] == "" and not i in exclude):
@@ -279,7 +279,7 @@ def updatevalidatepost(request):
     boolvar = True
     arr = AccrualD._meta.get_fields() if view == "definition" else AccrualR._meta.get_fields()
     for i in arr:
-        if(i.name == "InEffectiveDate" or i.name =="OutEffectiveDate"):
+        if(i.name == "InEffectiveDate" or i.name =="OutEffectiveDate" or i.name == "InvoiceByDate"):
             strs = data[j]
             data[j] = strs.replace("-","")
         if(isinstance(query[i.name], decimal.Decimal)):
@@ -458,7 +458,7 @@ def populate(request):
 def deletevalidate(request):
     data = dict(request.POST.lists()).get("data[]")
     view = dict(request.POST.lists()).get("view")[0]
-    exclude = [4,5,6,7] if view == "definition" else []
+    exclude = [5,6,7,8] if view == "definition" else []
     for i in range(len(data)):
         if(data[i] == "" and not i in exclude):
             request.session['error'] = True
