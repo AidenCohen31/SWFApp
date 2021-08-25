@@ -839,6 +839,7 @@ tr:first-child {
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script type=module" src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.0/FileSaver.min.js"></script>
  <script> 
+ var clickedele;
 $(document).ready(function () {
 //change selectboxes to selectize mode to be searchable
    $(".search").select2({
@@ -851,7 +852,7 @@ $(document).ready(function () {
 $(".table-name").each(function(index){
 
 if($(this).children().eq(0).text().trim() == "{{target}}"){
-
+clickedele = $(this)
 $(this).css("background-color","#3aafdc")
 $(".table-container").get(0).scroll(0,$(this).get(0).getBoundingClientRect().top-200)
 }
@@ -1063,10 +1064,10 @@ $("#updaterul").text("Update");
 $(".table-name").on("click", function(e){
 if($(this).css("background-color") == "rgba(0, 0, 0, 0)")
 {
+$(".table-name").css("background-color","");
+
 $("#ruleselect").val($(this).children().eq(0).text().trim())
 $("#ruleselect").trigger("change");
-$(".table-name").css("background-color","");
-$(this).css("background-color","#3aafdc");
 }
 else{
 $("#def-update-modal").css("display","block");
@@ -1370,6 +1371,7 @@ $(".container .table").html(temphtml.html())
 let url = new URL('',window.location.href);
 url.search = new URLSearchParams(params).toString();
 window.history.pushState("","load",url.href);
+$(clickedele).css("background-color","#3aafdc");
 
 })
 }
