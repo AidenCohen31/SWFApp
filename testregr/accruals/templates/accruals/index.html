@@ -1064,6 +1064,7 @@ $("#updaterul").text("Update");
 $(".table-name").on("click", function(e){
 if($(this).css("background-color") == "rgba(0, 0, 0, 0)")
 {
+clickedele = $(this)
 $(".table-name").css("background-color","");
 
 $("#ruleselect").val($(this).children().eq(0).text().trim())
