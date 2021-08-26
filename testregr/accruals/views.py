@@ -136,7 +136,6 @@ def validate(request):
                 returndict[0][1].append("Error: Form Submitted with empty values")
                 request.session['error'] = False
         if(data[0] != ""):
-
             quer = AccrualD.objects.using('Accrual').filter(AccrualName__iexact=data[0])
             if quer.exists():
                 returndict[0][1].append("Error: duplicate accrual name")
@@ -168,7 +167,9 @@ def validate(request):
         returndict = {
         1:["rulenum",[]],
         2:["ruleseq",[]],
-        8:["tstval",[]]
+        8:["tstval",[]],
+        9:["Indaterul",[]],
+        10:["Outdaterul",[]]
         }
         if(request.session.get('error',False)):
                 returndict[1][1].append("Error: Form Submitted with empty values")
@@ -180,6 +181,8 @@ def validate(request):
             returndict[2][1].append("Error: rule sequence number is not numeric")
         if((data[7] == "LS" or data[7] == "NS") and verifyWhitespace(data[8])):
             returndict[8][1].append("Error: whitespace in List")
+        if( data[9] != "" and data[10] != "" and int(data[9].replace("-","")) > int(data[10].replace("-",""))):
+            returndict[9][1].append("Error: InEffectiveDate larger than OutEffectiveDate")
         return JsonResponse(returndict)
 
 def verifyWhitespace(string):
