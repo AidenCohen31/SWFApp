@@ -136,8 +136,8 @@ def validate(request):
                 returndict[0][1].append("Error: Form Submitted with empty values")
                 request.session['error'] = False
         if(data[0] != ""):
-            data[0] = data[0].lower()
-            quer = AccrualD.objects.using('Accrual').filter(AccrualName=data[0])
+
+            quer = AccrualD.objects.using('Accrual').filter(AccrualName__iexact=data[0])
             if quer.exists():
                 returndict[0][1].append("Error: duplicate accrual name")
         if( data[2] != "" and data[3] != "" and int(data[2].replace("-","")) > int(data[3].replace("-",""))):
