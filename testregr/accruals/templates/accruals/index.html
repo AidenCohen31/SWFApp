@@ -699,8 +699,14 @@ tr:first-child {
 
 		</button>
 		<ul class="dropdown-menu spreadsheet" aria-labelledby="drop">
+			<li><div class="form-check form-switch" style="margin-left:20px;" >
+  <input type="checkbox" class="form-check-input" id="customSwitch1">
+  <label class="form-check-label" for="customSwitch1">Switch to Rules</label>
+</div></li>
 		<li><input class="dropdown-item" id="spinput" type="file" accept=".csv"> </li>
 	<li><button class="dropdown-item" type="button" id="downloadb">Download</button></li>
+
+
 		</ul>
 		</div>
 		
@@ -1242,8 +1248,9 @@ function download(filename, text) {
 
 $("#spinput").change(function(e){
 formdata = new FormData();
-let view = "definition";
-formdata.append("view", "definition" );
+let view = $("#customSwitch1").is(":checked") ? "rules" : "definition";
+
+formdata.append("view", view );
 formdata.append("csrfmiddlewaretoken","{{csrf_token}}")
 if($(this).prop('files').length > 0)
 {
