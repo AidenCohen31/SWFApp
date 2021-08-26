@@ -517,7 +517,7 @@ def files(request):
             if(view == "definition" and validated):
                 j = 0
                 for i in AccrualD._meta.get_fields():
-                    if(i.name == "InEffectiveDate" or i.name =="OutEffectiveDate"):
+                    if(i.name == "InEffectiveDate" or i.name =="OutEffectiveDate" or i.name == "InvoiceByDate"):
                         strs = data[j]
                         data[j] = strs.replace("-","")
                     if(j >= len(data) or data[j] == ""):
@@ -558,7 +558,8 @@ def files(request):
                 sendfile = True
             objs.save(using='Accrual')
 
-        except:
+        except Exception as e:
+            print(e)
             with open("problems.txt","a+") as f:
                 f.write("Error On Line" + str(linenumber))
                 sendfile = True
