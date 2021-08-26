@@ -87,7 +87,7 @@ DATABASES = {
 
         'NAME': 'PIMAdministration',
         'ENGINE': 'sql_server.pyodbc',
-        'HOST': 'WFMDEDW01Q\\UATAPP',
+        'HOST': 'WFMDEDW01Q\\MDMAPP',
         'USER': '',
         'PASSWORD':'',
         'PORT': '',
@@ -115,7 +115,7 @@ DATABASES = {
 
         'NAME': 'PIMAdministration',
         'ENGINE': 'sql_server.pyodbc',
-        'HOST': 'WFMDEDW01Q\\UATAPP',
+        'HOST': 'WFMDEDW01Q\\MDMAPP',
         'USER': '',
         'PASSWORD':'',
         'PORT': '',
