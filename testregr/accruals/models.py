@@ -52,6 +52,8 @@ class AccrualD(models.Model):
     ProcessedDate = models.DecimalField(max_digits=8,decimal_places=0, db_column="ACPDTE_ProcessedDate")
     ProcessedTime = models.DecimalField(max_digits=6, decimal_places=0, db_column="ACPTME_ProcessedTime")
     ProcessedUser = models.CharField(max_length=10, db_column="ACPUSR_ProcessedUser")
+    SQL_ID = models.IntegerField(db_column="SQL_ID")
+
     class Meta:
         managed = True
         db_table = '[ACR].[ZACRDEFP_AccrualDefinition]'
@@ -66,4 +68,4 @@ class Dropdown(models.Model):
     class Meta:
         managed = False
         db_table = '[ACR].[DropdownSelections]'
-        
+ 
