@@ -100,7 +100,9 @@ tr:first-child {
   background: white;
 }
 */
-
+#menu li {
+  display:inline;
+}
 </style>
 
  </head>
@@ -636,11 +638,47 @@ tr:first-child {
  
  </div>
  </header>
- <div class="parent-container d-flex"style="border-bottom: solid">
+ <div class="container-fluid">
+  <ul id="menu">
 
+ <li> <button id="add-button" class="btn btn-primary btn-lg"> Add Row</button></li>
+  <li><button id="filter-button" class="btn btn-danger btn-lg">Reset Filters</button></li>
+  <li>
+ <div class="dropdown" style="display:inline-block; margin-right:50px">
+		<button class="btn btn-lg spreadsheet btn-success dropdown-toggle" type="button" id="drop" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+		Spreadsheet Actions    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-file-earmark-excel" viewBox="0 0 16 16">
+  <path d="M5.884 6.68a.5.5 0 1 0-.768.64L7.349 10l-2.233 2.68a.5.5 0 0 0 .768.64L8 10.781l2.116 2.54a.5.5 0 0 0 .768-.641L8.651 10l2.233-2.68a.5.5 0 0 0-.768-.64L8 9.219l-2.116-2.54z"/>
+  <path d="M14 14V4.5L9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2zM9.5 3A1.5 1.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h5.5v2z"/>
+</svg> 	
+
+		</button>
+		<ul class="dropdown-menu spreadsheet" aria-labelledby="drop">
+			<li><div class="form-check form-switch" style="margin-left:20px;" >
+  <input type="checkbox" class="form-check-input" id="customSwitch1">
+  <label class="form-check-label" for="customSwitch1">Switch to Rules</label>
+</div></li>
+		<li><input class="dropdown-item" id="spinput" type="file" accept=".csv"> </li>
+	<li><button class="dropdown-item" type="button" id="downloadb">Download</button></li>
+
+
+		</ul>
+		</div>
+		
+		
+		 </li>
+	<li>
+		<a href="inputs" role="button" class="btn btn-info btn-lg">Modify Tables</a>
+		 </li>
+
+ </ul>
+ </div>
+
+ <div class="parent-container d-flex"style="border-bottom: solid">
+ 
  <div class="container-fluid table-container">
 
- <table class="table table-hover sqltable width:100%" >
+
+ <table class="table table-hover sqltable" >
 
  <thead>
 
@@ -678,49 +716,13 @@ tr:first-child {
     </div>
     <button type="submit" class="btn btn-primary" style="visibility:hidden;">Sign in</button>
   </form>
+  </div>
 </th>
  {% endfor %}
  </tr>
  </thead>
  <tbody>
-   <tr style="position: sticky;top:0;background: white;" >
-
- {% for data in cols %}
- {% if forloop.first %}
-  <td> <div class="d-grid gap-2"> <button id="add-button" class="btn btn-primary btn-lg"> Add Row</button></div></td>
-  <td> <div class="d-grid gap-2"> <button id="filter-button" class="btn btn-danger btn-lg">Reset Filters</button></div></td>
-  <td>
- <div class="dropdown" style="width: calc(100% - 45px);">
-		<button class="btn btn-lg spreadsheet btn-success dropdown-toggle" type="button" id="drop" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-		Spreadsheet Actions    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-file-earmark-excel" viewBox="0 0 16 16">
-  <path d="M5.884 6.68a.5.5 0 1 0-.768.64L7.349 10l-2.233 2.68a.5.5 0 0 0 .768.64L8 10.781l2.116 2.54a.5.5 0 0 0 .768-.641L8.651 10l2.233-2.68a.5.5 0 0 0-.768-.64L8 9.219l-2.116-2.54z"/>
-  <path d="M14 14V4.5L9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2zM9.5 3A1.5 1.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h5.5v2z"/>
-</svg> 	
-
-		</button>
-		<ul class="dropdown-menu spreadsheet" aria-labelledby="drop">
-			<li><div class="form-check form-switch" style="margin-left:20px;" >
-  <input type="checkbox" class="form-check-input" id="customSwitch1">
-  <label class="form-check-label" for="customSwitch1">Switch to Rules</label>
-</div></li>
-		<li><input class="dropdown-item" id="spinput" type="file" accept=".csv"> </li>
-	<li><button class="dropdown-item" type="button" id="downloadb">Download</button></li>
-
-
-		</ul>
-		</div>
-		
-		
-		 </td>
-	<td>
-		<a href="inputs" role="button" class="btn btn-info btn-lg">Modify Tables</a>
-		 </td>
-
- {% else %}
- <td> </td>
- {% endif %}
- {% endfor %}
- </tr>
+ 
  {% for data in alldata %}
  <tr class="table-name" name="table-row">
  
@@ -731,7 +733,6 @@ tr:first-child {
   {%endfor%}
  </tbody>
  </table>
-
 
 </div>
 <div class=" container table-container rules-container mt-3 mr-2" style="border-left: solid;">
