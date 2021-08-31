@@ -477,8 +477,12 @@ def filevalidate(lists,view):
         quer = AccrualD.objects.using('Accrual').filter(AccrualName=data[0])
         if quer.exists():
             error = True
+        print(data[2])
+        print(data[2].replace("-",""))
+        '''
         if(int(data[2].replace("-","")) > int(data[3].replace("-",""))):
             error = True
+        '''
         if(data[4] != "" and not data[4].replace('.','').isnumeric()):
             error = True
         if(data[5] != "" and not data[5].replace('.','').isnumeric()):
@@ -520,6 +524,8 @@ def files(request):
                     if(i.name == "InEffectiveDate" or i.name =="OutEffectiveDate" or i.name == "InvoiceByDate"):
                         strs = data[j]
                         data[j] = strs.replace("-","")
+                    if(i.name == "SQL_ID"):
+                        continue
                     if(j >= len(data) or data[j] == ""):
                         if(i.get_internal_type() == "DecimalField"):
                             setattr(objs,i.name,0)
@@ -538,7 +544,7 @@ def files(request):
                         strs = data[j]
                         data[j] = strs.replace("-","")
                     if(i.name == "SQL_ID"):
-                        print("hi")
+                        continue
                     elif(j >= len(data) or data[j] == ""):
                         if(i.get_internal_type() == "DecimalField" or i.get_internal_type =="IntegerField"):
                             setattr(objs,i.name,0)
@@ -557,12 +563,13 @@ def files(request):
                 f.writerow("Error On Line" + str(linenumber)) 
                 sendfile = True
             objs.save(using='Accrual')
-
+        
         except Exception as e:
             print(e)
             with open("problems.txt","a+") as f:
-                f.write("Error On Line" + str(linenumber))
+                f.writeline("Error On Line" + str(linenumber))
                 sendfile = True
+       
         linenumber +=1      
     if(sendfile):
         return FileResponse(open("problems.txt","rb"))

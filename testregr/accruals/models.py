@@ -52,7 +52,7 @@ class AccrualD(models.Model):
     ProcessedDate = models.DecimalField(max_digits=8,decimal_places=0, db_column="ACPDTE_ProcessedDate")
     ProcessedTime = models.DecimalField(max_digits=6, decimal_places=0, db_column="ACPTME_ProcessedTime")
     ProcessedUser = models.CharField(max_length=10, db_column="ACPUSR_ProcessedUser")
-    SQL_ID = models.IntegerField(db_column="SQL_ID", primary_key=True)
+    SQL_ID = models.AutoField(db_column="SQL_ID", primary_key=True)
 
     class Meta:
         managed = True

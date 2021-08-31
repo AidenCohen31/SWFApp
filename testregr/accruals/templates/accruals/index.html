@@ -1262,7 +1262,6 @@ else{
 alert("put in a csv please");
 }
 }
-$(".spinner-border").css("visibility","visible");
 
 $.ajax({
 url: "fileupload",
@@ -1276,13 +1275,12 @@ success: function(r){
 if(r.length > 0)
 {
 download("problems.txt", r)
-$(".spinner-border").css("visibility","hidden")
 
 alert("Downloaded Problems document");
 }
 else{
-$(".spinner-border").css("visibility","hidden")
 alert("Uploaded Successfully");
+
 location.reload();
 
 }
@@ -1290,7 +1288,6 @@ location.reload();
 
 },
 error : function(){
-$(".spinner-border").css("visibility","hidden")
 alert("Error");}
 });
 
@@ -1309,6 +1306,7 @@ data : {"view" : view, "csrfmiddlewaretoken": "{{csrf_token}}" },
 
 success : function(r){
 download("answers.csv",r)
+
 
 }
 }
