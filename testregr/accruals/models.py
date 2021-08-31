@@ -33,7 +33,7 @@ class AccrualR(models.Model):
         
         
 class AccrualD(models.Model):
-    AccrualName = models.CharField(max_length=50, primary_key=True, db_column="ACNAME_AccrualName")
+    AccrualName = models.CharField(max_length=50, db_column="ACNAME_AccrualName")
     AccrualType = models.CharField(max_length=15, db_column="ACTYPE_AccrualType")
     InEffectiveDate = models.DecimalField(max_digits=8,decimal_places=0, db_column="ACEFFI_InEffectiveDate")
     OutEffectiveDate = models.DecimalField(max_digits=8,decimal_places=0, db_column="ACEFFO_OutEffectiveDate")
@@ -52,7 +52,7 @@ class AccrualD(models.Model):
     ProcessedDate = models.DecimalField(max_digits=8,decimal_places=0, db_column="ACPDTE_ProcessedDate")
     ProcessedTime = models.DecimalField(max_digits=6, decimal_places=0, db_column="ACPTME_ProcessedTime")
     ProcessedUser = models.CharField(max_length=10, db_column="ACPUSR_ProcessedUser")
-    SQL_ID = models.IntegerField(db_column="SQL_ID")
+    SQL_ID = models.IntegerField(db_column="SQL_ID", primary_key=True)
 
     class Meta:
         managed = True

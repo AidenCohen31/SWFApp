@@ -1299,17 +1299,16 @@ alert("Error");}
 
 $("#downloadb").click(function(e){
 
-$(".spinner-border").css("visibility","visible");
+let view = $("#customSwitch1").is(":checked") ? "rules" : "definition";
 
 $.ajax(
 {
 url: "filedownload",
 type: "POST",
-data : {"view" : "definition", "csrfmiddlewaretoken": "{{csrf_token}}" },
+data : {"view" : view, "csrfmiddlewaretoken": "{{csrf_token}}" },
 
 success : function(r){
 download("answers.csv",r)
-$(".spinner-border").css("visibility","hidden")
 
 }
 }
