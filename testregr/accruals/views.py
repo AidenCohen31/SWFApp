@@ -475,21 +475,15 @@ def filevalidate(lists,view):
     error = False
     if(view != "rules"): 
         quer = AccrualD.objects.using('Accrual').filter(AccrualName=data[0])
-        if quer.exists():
+        if quer.exists() or data[0] == "":
             error = True
-        print(data[2])
-        print(data[2].replace("-",""))
-        '''
-        if(int(data[2].replace("-","")) > int(data[3].replace("-",""))):
+        if(data[4] == "" or not data[4].replace('.','').isnumeric()):
             error = True
-        '''
-        if(data[4] != "" and not data[4].replace('.','').isnumeric()):
+        if(data[5] == "" or not data[5].replace('.','').isnumeric()):
             error = True
-        if(data[5] != "" and not data[5].replace('.','').isnumeric()):
+        if(data[6] == "" or not data[6].replace('.','').isnumeric()):
             error = True
-        if(data[6] != "" and not data[6].replace('.','').isnumeric()):
-            error = True
-        if(data[7] != "" and not data[7].replace('.','').isnumeric()):
+        if(data[7] == "" or not data[7].replace('.','').isnumeric()):
             error = True
         if(checklength(data[4:8],"") < 3):
             error = True
@@ -514,6 +508,8 @@ def files(request):
     sendfile = False
     open("problems.txt", "w+").close()
     for data in readers:
+        if(data[0] == ""):
+            continue
         try:
             objs = AccrualD() if view == "definition" else AccrualR()
             attributes = AccrualD._meta.get_fields() if view=="definition" else AccrualR._meta.get_fields()
@@ -560,14 +556,14 @@ def files(request):
                     j+=1
             else:
               with open("problems.txt","a+") as f:
-                f.writerow("Error On Line" + str(linenumber)) 
+                f.write("Error On Line" + str(linenumber) + "\n") 
                 sendfile = True
             objs.save(using='Accrual')
         
         except Exception as e:
             print(e)
             with open("problems.txt","a+") as f:
-                f.writeline("Error On Line" + str(linenumber))
+                f.write("Error On Line" + str(linenumber) + "\n")
                 sendfile = True
        
         linenumber +=1      
