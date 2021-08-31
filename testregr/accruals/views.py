@@ -472,30 +472,30 @@ def deletevalidate(request):
 
 def filevalidate(lists,view):
     data = lists
-    error = False
+    error = True
     if(view != "rules"): 
         quer = AccrualD.objects.using('Accrual').filter(AccrualName=data[0])
-        if quer.exists() or data[0] == "":
-            error = True
-        if(data[4] == "" or not data[4].replace('.','').isnumeric()):
-            error = True
-        if(data[5] == "" or not data[5].replace('.','').isnumeric()):
-            error = True
-        if(data[6] == "" or not data[6].replace('.','').isnumeric()):
-            error = True
-        if(data[7] == "" or not data[7].replace('.','').isnumeric()):
-            error = True
+        if quer.exists():
+            error = False
+        if(data[4] != "" or not data[4].replace('.','').isnumeric()):
+            error = False
+        if(data[5] != "" or not data[5].replace('.','').isnumeric()):
+            error = False
+        if(data[6] != "" or not data[6].replace('.','').isnumeric()):
+            error = False
+        if(data[7] != "" or not data[7].replace('.','').isnumeric()):
+            error = False
         if(checklength(data[4:8],"") < 3):
-            error = True
+            error = False
         if(not data[8].replace('.','').isnumeric()):
-            error = True
+            error = False
         if(not data[9].replace('.','').isnumeric()):
-            error = True
+            error = False
     else:
         if(not data[1].replace('.','').isnumeric()):
-            error = True
+            error = False
         if(not data[2].replace('.','').isnumeric()):
-            error = True
+            error = False
     return error
 
 def files(request):
