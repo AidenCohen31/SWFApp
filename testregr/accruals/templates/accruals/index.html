@@ -1260,6 +1260,8 @@ formdata.append("csv", file);
 }
 else{
 alert("put in a csv please");
+location.reload();
+
 }
 }
 
@@ -1277,6 +1279,8 @@ if(r.length > 0)
 download("problems.txt", r)
 
 alert("Downloaded Problems document");
+location.reload();
+
 }
 else{
 alert("Uploaded Successfully");
@@ -1288,7 +1292,9 @@ location.reload();
 
 },
 error : function(){
-alert("Error");}
+alert("Error");
+location.reload();
+}
 });
 
 });
