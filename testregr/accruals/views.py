@@ -526,7 +526,12 @@ def files(request):
                         data[j] = strs.replace("-","")
                         print(data[j])
                     if(i.name == "SQL_ID"):
-                        continue
+                        quer = AccrualD.objects.using('Accrual').filter(SQL_ID=data[j])
+                        if quer.exists():
+                            setattr(objs,i.name,data[j])
+                            continue
+                        else:
+                            continue
                         
                     if(j >= len(data) or data[j] == ""):
                         if(i.get_internal_type() == "DecimalField"):
