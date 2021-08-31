@@ -477,16 +477,18 @@ def filevalidate(lists,view):
         quer = AccrualD.objects.using('Accrual').filter(AccrualName=data[0])
         if quer.exists():
             error = False
-        if(data[4] != "" or not data[4].replace('.','').isnumeric()):
+        if(data[4] != "" and not data[4].replace('.','').isnumeric()):
             error = False
-        if(data[5] != "" or not data[5].replace('.','').isnumeric()):
+        if(data[5] != "" and not data[5].replace('.','').isnumeric()):
             error = False
-        if(data[6] != "" or not data[6].replace('.','').isnumeric()):
+        if(data[6] != "" and not data[6].replace('.','').isnumeric()):
             error = False
-        if(data[7] != "" or not data[7].replace('.','').isnumeric()):
+        if(data[7] != "" and not data[7].replace('.','').isnumeric()):
             error = False
-        if(checklength(data[4:8],"") < 3):
+        if(checklength(data[4:8],"0") < 3):
             error = False
+        if( data[2] != "" and data[3] != "" and int(data[2].replace("-","")) > int(data[3].replace("-",""))):
+            returndict[2][1].append("Error: InEffectiveDate larger than OutEffectiveDate")
         if(not data[8].replace('.','').isnumeric()):
             error = False
         if(not data[9].replace('.','').isnumeric()):
@@ -508,7 +510,8 @@ def files(request):
     sendfile = False
     open("problems.txt", "w+").close()
     for data in readers:
-        if(data[0] == ""):
+        print(data)
+        if("" in data[0:12]):
             continue
         try:
             objs = AccrualD() if view == "definition" else AccrualR()
@@ -517,11 +520,14 @@ def files(request):
             if(view == "definition" and validated):
                 j = 0
                 for i in AccrualD._meta.get_fields():
+                    print(i.name == "InEffectiveDate")
                     if(i.name == "InEffectiveDate" or i.name =="OutEffectiveDate" or i.name == "InvoiceByDate"):
                         strs = data[j]
                         data[j] = strs.replace("-","")
+                        print(data[j])
                     if(i.name == "SQL_ID"):
                         continue
+                        
                     if(j >= len(data) or data[j] == ""):
                         if(i.get_internal_type() == "DecimalField"):
                             setattr(objs,i.name,0)
@@ -558,6 +564,7 @@ def files(request):
               with open("problems.txt","a+") as f:
                 f.write("Error On Line" + str(linenumber) + "\n") 
                 sendfile = True
+            print(vars(objs))
             objs.save(using='Accrual')
         
         except Exception as e:
