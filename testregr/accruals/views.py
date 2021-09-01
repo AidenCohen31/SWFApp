@@ -387,10 +387,12 @@ def update(request):
     checked = dict(request.POST.lists()).get("checked")[0]
     objs = None
     print(checked)
+    print(data)
     if(view != "rules"):
         objs = AccrualD()
         j = 0
         for i in AccrualD._meta.get_fields():
+                
             if(i.name == "InEffectiveDate" or i.name =="OutEffectiveDate" or i.name == "InvoiceByDate"):
                 strs = data[j]
                 data[j] = strs.replace("-","")
@@ -398,6 +400,9 @@ def update(request):
                 if(data[j] != ""):
                     nums = float(data[j])
                     data[j] = nums/100.0
+            if(i.name == "SQL_ID"):
+                setattr(objs,i.name,int(data[-1]))
+                continue
             if(j >= len(data) or data[j] == ""):
                 if(i.get_internal_type() == "DecimalField"):
                     setattr(objs,i.name,0)
@@ -413,7 +418,7 @@ def update(request):
             objs.save(using='Accrual')
             return redirect('/accruals/?view=definition&queryrule=' + data[0])
         else:
-            AccrualR.objects.filter(RuleName=data[0]).delete()
+            AccrualR.objects.filter(SQL_ID=data[-1]).delete()
             objs.delete()
         return redirect('/accruals/?view=definition')
 
