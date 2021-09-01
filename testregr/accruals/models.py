@@ -68,4 +68,8 @@ class Dropdown(models.Model):
     class Meta:
         managed = False
         db_table = '[ACR].[DropdownSelections]'
- 
+
+class Temp(models.Model):
+    CANAME = models.CharField(primary_key = True, max_length = 50, db_column = "CANAME")
+    class Meta:
+        managed = False

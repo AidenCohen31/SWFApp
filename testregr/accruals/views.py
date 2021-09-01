@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse, JsonResponse, QueryDict,HttpResponseRedirect, FileResponse
 from django.urls import reverse
-from .models import AccrualR, AccrualD, Dropdown
+from .models import AccrualR, AccrualD, Dropdown, Temp
 from django.test.client import RequestFactory
 import json,time,decimal,csv,re
 from django.forms.models import model_to_dict
@@ -82,7 +82,12 @@ def index(request):
             data[columns[i]] = field_object.value_from_object(row).rstrip() if isinstance(field_object.value_from_object(row), str) else field_object.value_from_object(row)
         response.append(data)
         
-
+    quer = "  SELECT A.CANAME, MAXS, A.CAPRCS FROM BIDIR.ZMDACDFP A JOIN(SELECT B.CANAME, MAX(CAST(TRIM(substring(B.CAID,4, LEN(B.CAID))) AS INT)) AS MAXS FROM BIDIR.ZMDACDFP B GROUP BY B.CANAME) B ON  A.CANAME=B.CANAME WHERE A.CAID = 'PIM' + CAST(MAXS AS VARCHAR) AND CAPRCS = 'E'"
+    tempobjs = Temp.objects.using('Error').raw(quer)
+    errorlists = []
+    for row in tempobjs:
+        errorlists.append(Temp._meta.get_field("CANAME").value_from_object(row).rstrip())
+    print(errorlists)
     dropdowns= {
     "AccrualType" : [ i.entry_name for i in Dropdown.objects.filter(view_name="AccrualType")],
     "Definition" : [i.AccrualName.rstrip() for i in AccrualD.objects.all()],
@@ -96,6 +101,7 @@ def index(request):
     "cols" : columns,
     "view" : view,
     "dropdown" : dropdowns,
+    "errors" : errorlists
     }
     if(view == "definition"):
         response = AccrualR.objects.all().values()
@@ -474,9 +480,6 @@ def filevalidate(lists,view):
     data = lists
     error = True
     if(view != "rules"): 
-        quer = AccrualD.objects.using('Accrual').filter(AccrualName=data[0])
-        if quer.exists():
-            error = False
         if(data[4] != "" and not data[4].replace('.','').isnumeric()):
             error = False
         if(data[5] != "" and not data[5].replace('.','').isnumeric()):
@@ -485,10 +488,10 @@ def filevalidate(lists,view):
             error = False
         if(data[7] != "" and not data[7].replace('.','').isnumeric()):
             error = False
-        if(checklength(data[4:8],"0") < 3):
+        if(checklength(data[5:9],"0") < 3):
             error = False
         if( data[2] != "" and data[3] != "" and int(data[2].replace("-","")) > int(data[3].replace("-",""))):
-            returndict[2][1].append("Error: InEffectiveDate larger than OutEffectiveDate")
+            error = False
         if(not data[8].replace('.','').isnumeric()):
             error = False
         if(not data[9].replace('.','').isnumeric()):
@@ -529,9 +532,6 @@ def files(request):
                         quer = AccrualD.objects.using('Accrual').filter(SQL_ID=data[j])
                         if quer.exists():
                             setattr(objs,i.name,data[j])
-                            continue
-                        else:
-                            continue
                         
                     if(j >= len(data) or data[j] == ""):
                         if(i.get_internal_type() == "DecimalField"):

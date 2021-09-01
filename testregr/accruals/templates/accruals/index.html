@@ -722,10 +722,18 @@ tr:first-child {
  <tbody>
  
  {% for data in alldata %}
- <tr class="table-name" name="table-row">
  
+ <tr class="table-name" name="table-row">
+
   {%for key,value in data.items%}
+   {%if data.AccrualName in errors and forloop.first %}
+	      <td class="bg-danger">{{value}}</td>
+
+	  {%else%}
     <td>{{value}}</td>
+
+ {%endif%}
+
 	{%endfor%}
   </tr>
   {%endfor%}

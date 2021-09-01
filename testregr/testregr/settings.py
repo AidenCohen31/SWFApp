@@ -125,6 +125,21 @@ DATABASES = {
         },
 
             },
+            'Error':{
+            'NAME':'INTDTA40',
+            'ENGINE': 'sql_server.pyodbc',
+            'HOST': 'wfmdedw02qn\\UATINT',
+            'USER':'',
+            'PASSWORD':'',
+            'PORT':'',
+            'OPTIONS': {
+            'driver' : 'ODBC Driver 17 for SQL Server',
+            'Trusted_Connection':'yes',
+            },
+            
+            
+            
+           },
     }
 
 
