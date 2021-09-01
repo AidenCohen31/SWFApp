@@ -567,17 +567,13 @@ def files(request):
                     j+=1
             else:
               with open("problems.txt","a+") as f:
-                f.write("Error On Line" + str(linenumber) + "\n") 
+                f.write("Error On Line " + str(linenumber) + ": " + data[0] + "\n") 
                 sendfile = True
             print(vars(objs))
             objs.save(using='Accrual')
         
         except Exception as e:
             print(e)
-            with open("problems.txt","a+") as f:
-                f.write("Error On Line" + str(linenumber) + "\n")
-                sendfile = True
-       
         linenumber +=1      
     if(sendfile):
         return FileResponse(open("problems.txt","rb"))
