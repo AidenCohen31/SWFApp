@@ -1161,7 +1161,7 @@ validations("postupdatevalidate", num).then((data) => {
 let values = []
 let elements = $(this).attr("id") == "def-update-form" ? document.getElementsByClassName("form3") : document.getElementsByClassName("form4");
 let form = $(this).attr("id") == "def-update-form" ? "def-update-form" : "rul-update-form";
-let flag = $(this).attr("id") == "def-update-form" ? $("#dltflg").val() : $("#updltflg").val()
+let flag = $(this).attr("id") == "def-update-form" ? $("#dltflg").is(':checked')  : $("#updltflg").is(':checked')
 if(!data)
 {
  return false;

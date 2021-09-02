@@ -278,12 +278,14 @@ def updatevalidatepost(request):
     data = dict(request.POST.lists()).get("data[]")
     view = dict(request.POST.lists()).get("view")[0]
     exclude = [5,6,7,8] if view == "definition" else [4,5,6]
-    
+    print(data)
     for i in range(len(data)):
         if(data[i] == "" and not i in exclude):
+            print(i)
             request.session['error'] = True
             request.session['message'] = "Error: Form Submitted with empty values"
             return validateupdate(request)
+    print(request.POST.lists())
     query = AccrualD.objects.filter(AccrualName=data[0]).values()[0] if view == "definition" else AccrualR.objects.filter(RuleName=data[0]).values()[0]
     j=0
     boolvar = True
@@ -331,8 +333,8 @@ def validateupdate(request):
                 return JsonResponse(returndict)
         if(data[0] != ""):
             quer = AccrualD.objects.using('Accrual').filter(AccrualName=data[0])
-            if not quer.exists():
-                returndict[0][1].append("Error: accrual name does not exist")
+            if quer.count() > 1:
+                returndict[0][1].append("Error: Duplicate Accrual name")
         if( data[2] != "" and data[3] != "" and int(data[2].replace("-","")) > int(data[3].replace("-",""))):
             returndict[2][1].append("Error: InEffectiveDate larger than OutEffectiveDate")
         if(data[5] != "" and not data[5].replace('.','').isnumeric()):
@@ -388,6 +390,11 @@ def update(request):
     objs = None
     print(checked)
     print(data)
+    if(checked == '' and view!="rules"):
+        print("hello")
+        AccrualR.objects.filter(RuleName=data[0]).delete()
+        AccrualD.objects.filter(SQL_ID=data[-1]).delete()
+        return redirect('/accruals/?view=definition')
     if(view != "rules"):
         objs = AccrualD()
         j = 0
@@ -417,10 +424,6 @@ def update(request):
         if(checked == 'false'):
             objs.save(using='Accrual')
             return redirect('/accruals/?view=definition&queryrule=' + data[0])
-        else:
-            AccrualR.objects.filter(SQL_ID=data[-1]).delete()
-            objs.delete()
-        return redirect('/accruals/?view=definition')
 
     else:
         primary_key = data[-1]
