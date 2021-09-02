@@ -159,7 +159,7 @@ def validate(request):
             returndict[7][1].append("Error: percent of cost is too big")
         if(data[8] != "" and (float(data[8])/100 >= 10  or float(data[8])/100 <= -10)):
             returndict[8][1].append("Error: percent of price is too big")
-        if(checklength(data[5:9],"") < 3):
+        if(checklength(data[5:9],"") < 3 or checklength(data[5:9],"") == 4):
             returndict[5][1].append("Error: Only 1/4 fields can be specified")
             returndict[6][1].append("Error: Only 1/4 fields can be specified")
             returndict[7][1].append("Error: Only 1/4 fields can be specified")
@@ -286,31 +286,32 @@ def updatevalidatepost(request):
             request.session['message'] = "Error: Form Submitted with empty values"
             return validateupdate(request)
     print(request.POST.lists())
-    query = AccrualD.objects.filter(AccrualName=data[0]).values()[0] if view == "definition" else AccrualR.objects.filter(RuleName=data[0]).values()[0]
-    j=0
-    boolvar = True
-    arr = AccrualD._meta.get_fields() if view == "definition" else AccrualR._meta.get_fields()
-    for i in arr:
-        if(i.name == "InEffectiveDate" or i.name =="OutEffectiveDate" or i.name == "InvoiceByDate"):
-            strs = data[j]
-            data[j] = strs.replace("-","")
-        if(isinstance(query[i.name], decimal.Decimal)):
-            if(data[j] == ""):
-                data[j] = "0"
-            if(not float(query[i.name]) == float(data[j])):
+    if(AccrualD.objects.filter(AccrualName=data[0]).exists()):
+        query = AccrualD.objects.filter(AccrualName=data[0]).values()[0] if view == "definition" else AccrualR.objects.filter(RuleName=data[0]).values()[0]
+        j=0
+        boolvar = True
+        arr = AccrualD._meta.get_fields() if view == "definition" else AccrualR._meta.get_fields()
+        for i in arr:
+            if(i.name == "InEffectiveDate" or i.name =="OutEffectiveDate" or i.name == "InvoiceByDate"):
+                strs = data[j]
+                data[j] = strs.replace("-","")
+            if(isinstance(query[i.name], decimal.Decimal)):
+                if(data[j] == ""):
+                    data[j] = "0"
+                if(not float(query[i.name]) == float(data[j])):
+                    boolvar = False
+                data[j] = ""
+            elif(query[i.name] != data[j]):
                 boolvar = False
-            data[j] = ""
-        elif(query[i.name] != data[j]):
-            boolvar = False
-        elif(query[i.name].rstrip() != data[j]):
-            boolvar = False
-        j+=1
-        if(len(data) == j):
-            break
-    if(boolvar):
-        request.session['error'] = True
-        request.session['message'] = "Error: Form not changed"
-        return validateupdate(request)
+            elif(query[i.name].rstrip() != data[j]):
+                boolvar = False
+            j+=1
+            if(len(data) == j):
+                break
+        if(boolvar):
+            request.session['error'] = True
+            request.session['message'] = "Error: Form not changed"
+            return validateupdate(request)
 
     return JsonResponse({})
     
@@ -321,19 +322,21 @@ def validateupdate(request):
         returndict = {0: ["accNameUpdate",[]],
                       2: ["IndateUpdate",[]],
                       3: ["OutdateUpdate",[]],
-                      4: ["amtlineUpdate",[]],
-                      5: ["amtunitUpdate", []],
-                      6: ["costpercentUpdate",[]],
-                      7: ["pricepercentUpdate",[]],
-                      9:["annualUpdate",[]],
-                      8:["monthlyUpdate",[]]}
+                      5: ["amtlineUpdate",[]],
+                      6: ["amtunitUpdate", []],
+                      7: ["costpercentUpdate",[]],
+                      8: ["pricepercentUpdate",[]],
+                      10:["annualUpdate",[]],
+                      9:["monthlyUpdate",[]]}
         if(request.session.get('error',False)):
                 returndict[0][1].append(request.session['message'])
                 request.session['error'] = False
                 return JsonResponse(returndict)
         if(data[0] != ""):
             quer = AccrualD.objects.using('Accrual').filter(AccrualName=data[0])
-            if quer.count() > 1:
+            print(quer.first().pk) 
+            print(int(data[-1]))
+            if quer.count() > 1 or ( quer.count() == 1 and quer.first().pk != int(data[-1])):
                 returndict[0][1].append("Error: Duplicate Accrual name")
         if( data[2] != "" and data[3] != "" and int(data[2].replace("-","")) > int(data[3].replace("-",""))):
             returndict[2][1].append("Error: InEffectiveDate larger than OutEffectiveDate")
@@ -349,7 +352,7 @@ def validateupdate(request):
             returndict[7][1].append("Error: percent of cost is too big")
         if(data[8] != "" and (float(data[8])/100 >= 10  or float(data[8])/100 <= -10)):
             returndict[8][1].append("Error: percent of price is too big")
-        if(checklength(data[5:9],"") < 3):
+        if(checklength(data[5:9],"") < 3 or checklength(data[5:9],"") == 4 ):
             returndict[5][1].append("Error: Only 1/4 fields can be specified")
             returndict[6][1].append("Error: Only 1/4 fields can be specified")
             returndict[7][1].append("Error: Only 1/4 fields can be specified")
@@ -496,7 +499,7 @@ def filevalidate(lists,view):
             error = False
         if(data[7] != "" and not data[7].replace('.','').isnumeric()):
             error = False
-        if(checklength(data[5:9],"0") < 3):
+        if(checklength(data[5:9],"0") < 3 or checklength(data[5:9],"") == 4):
             error = False
         if( data[2] != "" and data[3] != "" and int(data[2].replace("-","")) > int(data[3].replace("-",""))):
             error = False
