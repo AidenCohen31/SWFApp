@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse, JsonResponse, QueryDict,HttpResponseRedirect, FileResponse
 from django.urls import reverse
-from .models import AccrualR, AccrualD, Dropdown, Temp
+from .models import Master, Rules, LifeCycle
 from django.test.client import RequestFactory
 import json,time,decimal,csv,re
 from django.forms.models import model_to_dict
@@ -17,12 +17,12 @@ def index(request):
     print("at index")
     table = dict(request.GET.lists())
     if(len(table) == 0):
-        table['view'] = ["definition"]
+        table['view'] = ["Rules"]
     if(table.get('reset',False)):
         request.session.clear()
     quer = "SELECT TOP(1000) * FROM "
     columns = []
-    view = "definition"
+    view = "Rules"
     objs = None
     asc = []
     desc = []
@@ -36,18 +36,17 @@ def index(request):
         request.session['asc'] = asc
         request.session['desc'] = desc
     for keys in table:
-        print(getattr(AccrualD,'AccrualName',False))
-        if(getattr(AccrualD, keys, False)):
+        if(getattr(Master, keys, False)):
             search.append([keys,table[keys]])
     
-    if(table.get('view',['definition'])[0] != "rules"):
-        quer+= 'ACR.ZACRDEFP_AccrualDefinition '
+    if(table.get('view',['master'])[0] != "rules"):
+        quer+= ' '
         print(search)
         for i,member in enumerate(search):
             if(i == 0):
-                quer += 'WHERE ' + AccrualD._meta.get_field(member[0]).column + ' LIKE ' + "'%%" + member[1][0] + "%%'"            
+                quer += 'WHERE ' + Master._meta.get_field(member[0]).column + ' LIKE ' + "'%%" + member[1][0] + "%%'"            
             else:
-                quer += 'AND '  + AccrualD._meta.get_field(member[0]).column + ' LIKE ' + " '%%" + member[1][0] + "%%' " 
+                quer += 'AND '  + Master._meta.get_field(member[0]).column + ' LIKE ' + " '%%" + member[1][0] + "%%' " 
         if(len(asc) == 0 and len(desc) == 0):
             quer+= ' ORDER BY ACNAME_AccrualName'
         else:
@@ -55,17 +54,17 @@ def index(request):
             for i,member in enumerate(asc):
                 print(member)
                 if(i == 0):
-                    quer += AccrualD._meta.get_field(member).column + ' ASC'
+                    quer += Master._meta.get_field(member).column + ' ASC'
                 else:
-                    quer += ", " + AccrualD._meta.get_field(member).column + ' ASC'
+                    quer += ", " + Master._meta.get_field(member).column + ' ASC'
             for i,member in enumerate(desc):
                 if(i == 0 and len(asc) == 0):
-                    quer += AccrualD._meta.get_field(member).column + ' DESC'
+                    quer += Master._meta.get_field(member).column + ' DESC'
                 else:
-                    quer += ", " + AccrualD._meta.get_field(member).column + ' DESC'
+                    quer += ", " + Master._meta.get_field(member).column + ' DESC'
 
-        columns = [ i.name for i in AccrualD._meta.get_fields()]
-        objs = AccrualD.objects.using('Accrual').raw(quer)
+        columns = [ i.name for i in Master._meta.get_fields()]
+        objs = Master.objects.using('Accrual').raw(quer)
     else:
         quer+= 'ACR.ZACRRULP_AccrualRules ORDER BY ARName_RuleName,ARRULE#_RuleNumber,ARRULESEQ_RuleSequence'
         columns = [ i.name for i in AccrualR._meta.get_fields()]
@@ -78,7 +77,7 @@ def index(request):
     for row in objs:
         data = {}
         for i in range(0,len(columns)):
-            field_object = AccrualD._meta.get_field(columns[i]) if view == "definition" else AccrualR._meta.get_field(columns[i])
+            field_object = Master._meta.get_field(columns[i]) if view == "definition" else AccrualR._meta.get_field(columns[i])
             data[columns[i]] = field_object.value_from_object(row).rstrip() if isinstance(field_object.value_from_object(row), str) else field_object.value_from_object(row)
         response.append(data)
         
@@ -90,7 +89,7 @@ def index(request):
     print(errorlists)
     dropdowns= {
     "AccrualType" : [ i.entry_name for i in Dropdown.objects.filter(view_name="AccrualType")],
-    "Definition" : [i.AccrualName.rstrip() for i in AccrualD.objects.all()],
+    "Definition" : [i.AccrualName.rstrip() for i in Master.objects.all()],
     "Operator" : [[i.entry_name,i.value_name] for i in Dropdown.objects.filter(view_name="Operator")],
     "TestObject" : [[i.entry_name,i.value_name] for i in Dropdown.objects.filter(view_name="TestObject")]
     }
@@ -142,7 +141,7 @@ def validate(request):
                 returndict[0][1].append("Error: Form Submitted with empty values")
                 request.session['error'] = False
         if(data[0] != ""):
-            quer = AccrualD.objects.using('Accrual').filter(AccrualName__iexact=data[0])
+            quer = Master.objects.using('Accrual').filter(AccrualName__iexact=data[0])
             if quer.exists():
                 returndict[0][1].append("Error: duplicate accrual name")
         if( data[2] != "" and data[3] != "" and int(data[2].replace("-","")) > int(data[3].replace("-",""))):
@@ -159,7 +158,7 @@ def validate(request):
             returndict[7][1].append("Error: percent of cost is too big")
         if(data[8] != "" and (float(data[8])/100 >= 10  or float(data[8])/100 <= -10)):
             returndict[8][1].append("Error: percent of price is too big")
-        if(checklength(data[5:9],"")<3):
+        if(checklength(data[5:9],"") < 3):
             returndict[5][1].append("Error: Only 1/4 fields can be specified")
             returndict[6][1].append("Error: Only 1/4 fields can be specified")
             returndict[7][1].append("Error: Only 1/4 fields can be specified")
@@ -211,9 +210,9 @@ def insert(request):
     view = dict(request.POST.lists()).get("view")[0]
     objs = None
     if(view != "rules"):
-        objs = AccrualD()
+        objs = Master()
         j = 0
-        for i in AccrualD._meta.get_fields():
+        for i in Master._meta.get_fields():
             if(i.name == "InEffectiveDate" or i.name =="OutEffectiveDate"or i.name == "InvoiceByDate"):
                 strs = data[j]
                 data[j] = strs.replace("-","")
@@ -247,7 +246,7 @@ def insert(request):
                 if(i.get_internal_type() == "DecimalField" or i.get_internal_type =="IntegerField"):
                     setattr(objs,i.name,0)
                 else:
-                    setattr(objs,i.name,"")
+                    setattr(objs,i.name,None)
             else:
                 if(i.get_internal_type() == "DecimalField"):
                     setattr(objs,i.name, float(data[j]))
@@ -263,11 +262,8 @@ def insert(request):
 def validatepost(request):
     data = dict(request.POST.lists()).get("data[]")
     view = dict(request.POST.lists()).get("view")[0]
-    if( checklength(data[5:9],"") == 4):
-        request.session['error'] = True
-        request.session['message'] = "Error: Form Submitted with empty values"
-        return validateupdate(request)
-    exclude = [5,6,7,8] if view == "definition" else [4,5,6]
+
+    exclude = [5,6,7,8] if view == "definition" else []
     print(data)
     for i in range(len(data)):
         if(data[i] == "" and not i in exclude):
@@ -282,10 +278,8 @@ def updatevalidatepost(request):
     view = dict(request.POST.lists()).get("view")[0]
     exclude = [5,6,7,8] if view == "definition" else [4,5,6]
     print(data)
-    if( checklength(data[5:9],"") == 4):
-        request.session['error'] = True
-        request.session['message'] = "Error: Form Submitted with empty values"
-        return validateupdate(request)
+
+
     for i in range(len(data)):
         if(data[i] == "" and not i in exclude):
             print(i)
@@ -293,11 +287,11 @@ def updatevalidatepost(request):
             request.session['message'] = "Error: Form Submitted with empty values"
             return validateupdate(request)
     print(request.POST.lists())
-    if(AccrualD.objects.filter(AccrualName=data[0]).exists()):
-        query = AccrualD.objects.filter(AccrualName=data[0]).values()[0] if view == "definition" else AccrualR.objects.filter(RuleName=data[0]).values()[0]
+    if(Master.objects.filter(AccrualName=data[0]).exists()):
+        query = Master.objects.filter(AccrualName=data[0]).values()[0] if view == "definition" else AccrualR.objects.filter(RuleName=data[0]).values()[0]
         j=0
         boolvar = True
-        arr = AccrualD._meta.get_fields() if view == "definition" else AccrualR._meta.get_fields()
+        arr = Master._meta.get_fields() if view == "definition" else AccrualR._meta.get_fields()
         for i in arr:
             if(i.name == "InEffectiveDate" or i.name =="OutEffectiveDate" or i.name == "InvoiceByDate"):
                 strs = data[j]
@@ -333,16 +327,14 @@ def validateupdate(request):
                       6: ["amtunitUpdate", []],
                       7: ["costpercentUpdate",[]],
                       8: ["pricepercentUpdate",[]],
-                      10    :["annualUpdate",[]],
+                      10:["annualUpdate",[]],
                       9:["monthlyUpdate",[]]}
         if(request.session.get('error',False)):
                 returndict[0][1].append(request.session['message'])
                 request.session['error'] = False
                 return JsonResponse(returndict)
         if(data[0] != ""):
-            quer = AccrualD.objects.using('Accrual').filter(AccrualName=data[0])
-            print(quer.first().pk) 
-            print(int(data[-1]))
+            quer = Master.objects.using('Accrual').filter(AccrualName=data[0])
             if quer.count() > 1 or ( quer.count() == 1 and quer.first().pk != int(data[-1])):
                 returndict[0][1].append("Error: Duplicate Accrual name")
         if( data[2] != "" and data[3] != "" and int(data[2].replace("-","")) > int(data[3].replace("-",""))):
@@ -359,7 +351,7 @@ def validateupdate(request):
             returndict[7][1].append("Error: percent of cost is too big")
         if(data[8] != "" and (float(data[8])/100 >= 10  or float(data[8])/100 <= -10)):
             returndict[8][1].append("Error: percent of price is too big")
-        if(checklength(data[5:9],"") < 3):
+        if(checklength(data[5:9],"") < 3 or checklength(data[5:9],"") == 4 ):
             returndict[5][1].append("Error: Only 1/4 fields can be specified")
             returndict[6][1].append("Error: Only 1/4 fields can be specified")
             returndict[7][1].append("Error: Only 1/4 fields can be specified")
@@ -403,12 +395,12 @@ def update(request):
     if(checked == '' and view!="rules"):
         print("hello")
         AccrualR.objects.filter(RuleName=data[0]).delete()
-        AccrualD.objects.filter(SQL_ID=data[-1]).delete()
+        Master.objects.filter(SQL_ID=data[-1]).delete()
         return redirect('/accruals/?view=definition')
     if(view != "rules"):
-        objs = AccrualD()
+        objs = Master()
         j = 0
-        for i in AccrualD._meta.get_fields():
+        for i in Master._meta.get_fields():
                 
             if(i.name == "InEffectiveDate" or i.name =="OutEffectiveDate" or i.name == "InvoiceByDate"):
                 strs = data[j]
@@ -469,7 +461,7 @@ def populate(request):
     indate =""
     outdate=""
     if(data.get("definition",False)):
-        for i in AccrualD.objects.filter(AccrualName = data.get("definition")[0].rstrip()):
+        for i in Master.objects.filter(AccrualName = data.get("definition")[0].rstrip()):
             i.InEffectiveDate = str(i.InEffectiveDate)
             i.OutEffectiveDate = str(i.OutEffectiveDate)
             indate = i.InEffectiveDate[0:4] + "-" + i.InEffectiveDate[4:6] + "-" + i.InEffectiveDate[6:8]
@@ -486,7 +478,7 @@ def populate(request):
 def deletevalidate(request):
     data = dict(request.POST.lists()).get("data[]")
     view = dict(request.POST.lists()).get("view")[0]
-    exclude = [5,6,7,8] if view == "definition" else [4,5,6]
+    exclude = [5,6,7,8] if view == "definition" else []
     for i in range(len(data)):
         if(data[i] == "" and not i in exclude):
             request.session['error'] = True
@@ -535,19 +527,19 @@ def files(request):
         if("" in data[0:12]):
             continue
         try:
-            objs = AccrualD() if view == "definition" else AccrualR()
-            attributes = AccrualD._meta.get_fields() if view=="definition" else AccrualR._meta.get_fields()
+            objs = Master() if view == "definition" else AccrualR()
+            attributes = Master._meta.get_fields() if view=="definition" else AccrualR._meta.get_fields()
             validated = filevalidate(list(data), view)
             if(view == "definition" and validated):
                 j = 0
-                for i in AccrualD._meta.get_fields():
+                for i in Master._meta.get_fields():
                     print(i.name == "InEffectiveDate")
                     if(i.name == "InEffectiveDate" or i.name =="OutEffectiveDate" or i.name == "InvoiceByDate"):
                         strs = data[j]
                         data[j] = strs.replace("-","")
                         print(data[j])
                     if(i.name == "SQL_ID"):
-                        quer = AccrualD.objects.using('Accrual').filter(SQL_ID=data[j])
+                        quer = Master.objects.using('Accrual').filter(SQL_ID=data[j])
                         if quer.exists():
                             setattr(objs,i.name,data[j])
                         
@@ -605,8 +597,8 @@ def filedownload(request):
     request = None
     columns = []
     if(views != "rules"):
-        columns = [ i.name for i in AccrualD._meta.get_fields()]
-        request = AccrualD.objects.using('Accrual').all()
+        columns = [ i.name for i in Master._meta.get_fields()]
+        request = Master.objects.using('Accrual').all()
     else:
         columns = [ i.name for i in AccrualR._meta.get_fields()]
         views = "rules"
@@ -616,7 +608,7 @@ def filedownload(request):
     for row in request:
         data = []
         for i in range(0,len(columns)):
-            field_object = AccrualD._meta.get_field(columns[i]) if views == "definition" else AccrualR._meta.get_field(columns[i])
+            field_object = Master._meta.get_field(columns[i]) if views == "definition" else AccrualR._meta.get_field(columns[i])
             data.append(field_object.value_from_object(row))
         writers.writerow(data)
     return FileResponse(open("answers.csv","rb"))

@@ -9,7 +9,7 @@ class AccrualR(models.Model):
     ObjectType = models.CharField(max_length=20,db_column="AROBJTYPE_ObjectType")
     Table = models.CharField(max_length=10,db_column="ARTABLE_Table")
     Field = models.CharField(max_length=20, db_column="ARFIELD_Field")
-    TestObject = models.CharField(max_length=15, db_column="ARTSTOBJ_TestObject")
+    TestObject = models.CharField(max_length=50, db_column="ARTSTOBJ_TestObject")
     Operator = models.CharField(max_length=2, db_column="AROPER_Operator")
     TestValue = models.CharField(max_length=160, db_column="ARTSTVAL_TestValue")
     InEffectiveDate = models.DecimalField(max_digits=8,decimal_places=0,db_column="AREFFI_InEffectiveDate")

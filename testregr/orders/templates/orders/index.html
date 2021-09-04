@@ -109,8 +109,8 @@ tr:first-child {
  
  <div id="myModal" class="modal">
  <div id="subtotal-modal" class="modal-content">
- <h1>Insert </h1>
-  <div class="alert alert-danger alert2" role="alert" style="display:none;">
+ <h1>Insert: Master </h1>
+  <div class="alert alert-danger alert1" role="alert" style="display:none;">
 	  <h5>Form Validation Failed</h5>
 	  <ul id="error-li2">
 		</ul>	  
@@ -635,12 +635,13 @@ tr:first-child {
  <header style="position:relative; top:0;z-index:10;">
  <div class="p-5 bg-light headers"style="margin:auto;">
  
- <h1 style="line-height:0px;">Accruals App </h1>
+ <h1 style="line-height:0px;">Order Status App </h1>
  
  </div>
  </header>
  <div class="container-fluid">
   <ul id="menu">
+ <li> <button id="switch-button" class="btn btn-primary btn-lg">Switch to Lifecycle</button></li>
 
  <li> <button id="add-button" class="btn btn-primary btn-lg"> Add Row</button></li>
   <li><button id="filter-button" class="btn btn-danger btn-lg">Reset Filters</button></li>
@@ -1404,6 +1405,7 @@ $(clickedele).css("background-color","#3aafdc");
 
 
 $(".table_row").click(function(e){
+
 $(".table_row").css("background-color","")
 $(this).css("background-color","#3aafdc")
 $("#update-modal").css("display","block");
