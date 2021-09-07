@@ -341,8 +341,6 @@ def validateupdate(request):
                 return JsonResponse(returndict)
         if(data[0] != ""):
             quer = AccrualD.objects.using('Accrual').filter(AccrualName=data[0])
-            print(quer.first().pk) 
-            print(int(data[-1]))
             if quer.count() > 1 or ( quer.count() == 1 and quer.first().pk != int(data[-1])):
                 returndict[0][1].append("Error: Duplicate Accrual name")
         if( data[2] != "" and data[3] != "" and int(data[2].replace("-","")) > int(data[3].replace("-",""))):
@@ -569,7 +567,10 @@ def files(request):
                         strs = data[j]
                         data[j] = strs.replace("-","")
                     if(i.name == "SQL_ID"):
-                        continue
+                        quer = AccrualR.objects.using('Accrual').filter(SQL_ID=data[j])
+                        print(quer)
+                        if quer.exists():
+                            setattr(objs,i.name,data[j])
                     elif(j >= len(data) or data[j] == ""):
                         if(i.get_internal_type() == "DecimalField" or i.get_internal_type =="IntegerField"):
                             setattr(objs,i.name,0)
@@ -587,9 +588,9 @@ def files(request):
               with open("problems.txt","a+") as f:
                 f.write("Error On Line " + str(linenumber) + ": " + data[0] + "\n") 
                 sendfile = True
-            print(vars(objs))
+            print(objs.pk)  
+
             objs.save(using='Accrual')
-        
         except Exception as e:
             print(e)
         linenumber +=1      
