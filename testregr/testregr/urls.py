@@ -20,5 +20,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('frontend/', include('frontend.urls')),
     path('accruals/',include('accruals.urls')),
+    path('orders/',include('orders.urls')),
+
     path('', RedirectView.as_view(url='accruals/',permanent=True)),
 ]

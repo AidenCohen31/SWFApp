@@ -110,7 +110,7 @@ tr:first-child {
  <div id="myModal" class="modal">
  <div id="subtotal-modal" class="modal-content">
  <h1>Insert: Master </h1>
-  <div class="alert alert-danger alert1" role="alert" style="display:none;">
+  <div class="alert alert-danger alert2" role="alert" style="display:none;">
 	  <h5>Form Validation Failed</h5>
 	  <ul id="error-li2">
 		</ul>	  
@@ -677,10 +677,10 @@ tr:first-child {
 
  <div class="parent-container d-flex"style="border-bottom: solid">
  
- <div class="container-fluid table-container">
+ <div class="table-container" style="width:20%; padding-right:30px; margin 0;">
 
 
- <table class="table table-hover sqltable" >
+ <table class="table table-hover sqltable">
 
  <thead>
 
@@ -730,6 +730,7 @@ tr:first-child {
  <tr class="table-name" name="table-row">
 
   {%for key,value in data.items%}
+
    {%if data.AccrualName in errors and forloop.first %}
 	      <td class="bg-danger">{{value}}</td>
 
@@ -745,7 +746,8 @@ tr:first-child {
  </table>
 
 </div>
-<div class=" container table-container rules-container mt-3 mr-2" style="border-left: solid;">
+
+<div class="table-container rules-container" style="border-left: solid; border-right: solid; padding-left: 30px; width:40%;">
 	  <div class="" style="display:block;" >
   	<div class="row">
 <div class="col-auto">
@@ -816,6 +818,32 @@ tr:first-child {
   </div>
 </div>
 </div>
+
+<div class="table-container" style = "width:40%;">
+<table style="table-layout: auto; width:200%;">
+<thead>
+{%for i in othercols%}
+<th scope="col"> {{i}} </th>
+{% endfor %}
+</thead>
+ <tbody>
+ 
+ {% for data in master %}
+ 
+ <tr>
+
+  {%for key,value in data.items%}
+
+    <td>{{value}}</td>
+
+
+	{%endfor%}
+  </tr>
+  {%endfor%}
+ </tbody>
+ </table>
+
+</div>
 </div>
 
  <footer class="pt-5 text-center text-lg start bg-light text-muted">
@@ -867,10 +895,11 @@ $(document).ready(function () {
 });
 
 $(".table-name").each(function(index){
-
-if($(this).children().eq(0).text().trim() == "{{target}}"){
+console.log("{{target}}")
+if($(this).children().eq(1).text().trim() == "{{target}}"){	
 clickedele = $(this)
 $(this).css("background-color","#3aafdc")
+console.log("hello")
 $(".table-container").get(0).scroll(0,$(this).get(0).getBoundingClientRect().top-200)
 }
 }
@@ -1083,7 +1112,6 @@ if($(this).css("background-color") == "rgba(0, 0, 0, 0)")
 {
 clickedele = $(this)
 $(".table-name").css("background-color","");
-
 $("#ruleselect").val($(this).children().eq(0).text().trim())
 $("#ruleselect").trigger("change");
 }
@@ -1405,23 +1433,11 @@ $(clickedele).css("background-color","#3aafdc");
 
 
 $(".table_row").click(function(e){
-
 $(".table_row").css("background-color","")
 $(this).css("background-color","#3aafdc")
 $("#update-modal").css("display","block");
 $("#upaccselect").val("{{target}}")
 $('#upaccselect').trigger('change');
-$("#uptestobj").val($(this).children().eq(3).text().trim())
-$('#uptestobj').trigger('change');
-$("#upop").val($(this).children().eq(4).text().trim())
-$("#uptstval").val($(this).children().eq(5).text().trim())
-$("#upruleseq").val($(this).children().eq(2).text().trim())
-$("#uprulenum").val($(this).attr("name").trim());
-date = $(this).children().eq(6).text().trim()
-$("#upIndaterul").val(date.substring(0,4) + "-" + date.substring(4,6)  + "-" + date.substring(6,8))
-date = $(this).children().eq(7).text().trim()
-$("#upoutdaterul").val(date.substring(0,4) + "-" + date.substring(4,6)  + "-" + date.substring(6,8))
-$("#sqlid").val($(this).children().eq(8).text().trim())
 
 });
 

@@ -30,13 +30,12 @@ class Rules(models.Model):
         db_table = '[OS].[ZMPSTSP_OrderStatusRules]'
         
         
-        
 class Master(models.Model):
     SQL_ID = models.AutoField(db_column="STID_SqlId", primary_key=True)
     InternalStatusCode = models.CharField(max_length=20, db_column="STICDE_InternalStatusCode")
     InternalDescription = models.CharField(max_length=50, db_column="STIDSC_InternalDescription")
-    ExternalStatusCode = models.CharField(max_length=20, db_column="STECDE_InternalStatusCode")
-    ExternalDescription = models.CharField(max_length=50, db_column="STEDSC_InternalDescription")
+    ExternalStatusCode = models.CharField(max_length=20, db_column="STECDE_ExternalStatusCode")
+    ExternalDescription = models.CharField(max_length=50, db_column="STEDSC_ExternalDescription")
     StatusGroup1 = models.CharField(max_length=20, db_column="STGRP1_StatusGroup1")
     StatusGroup2 = models.CharField(max_length=20, db_column="STGRP2_StatusGroup2")
     StatusGroup3 = models.CharField(max_length=20, db_column="STGRP3_StatusGroup3")
@@ -57,7 +56,7 @@ class Master(models.Model):
 class LifeCycle(models.Model):
     SQL_ID = models.AutoField(db_column="LCID_SqlId", primary_key=True)
     OrderCategory = models.CharField(max_length=10,db_column="LCCTGY_OrderCategory")
-    ProcessingSequence - models.DecimalField(max_digits=5,decimal_places=2,db_column="LCSEQ_ProcessingSequence")
+    ProcessingSequence = models.DecimalField(max_digits=5,decimal_places=2,db_column="LCSEQ_ProcessingSequence")
     RuleName = models.CharField(max_length=50,db_column="LCRULENM_RuleName")
     InEffectiveDate = models.DecimalField(max_digits=8,decimal_places=0, db_column="LCEFFI_InEffectiveDate")
     OutEffectiveDate = models.DecimalField(max_digits=8,decimal_places=0, db_column="LCEFFO_OutEffectiveDate")

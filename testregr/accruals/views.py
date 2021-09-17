@@ -563,6 +563,10 @@ def files(request):
             elif(validated):
                 j = 0
                 for i in AccrualR._meta.get_fields():
+                    if(i.name == "RuleName"):
+                        quer = AccrualD.objects.using('Accrual').filter(AccrualName = data[j])
+                        if not quer.exists():
+                            raise Exception('Err')
                     if(i.name == "InEffectiveDate" or i.name =="OutEffectiveDate"):
                         strs = data[j]
                         data[j] = strs.replace("-","")

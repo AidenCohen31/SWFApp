@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse, JsonResponse, QueryDict,HttpResponseRedirect, FileResponse
 from django.urls import reverse
-from .models import Master, Rules, LifeCycle
+from .models import Master, Rules, LifeCycle, Temp
 from django.test.client import RequestFactory
 import json,time,decimal,csv,re
 from django.forms.models import model_to_dict
@@ -16,13 +16,21 @@ def index(request):
     #store sorts and stuff in sessions
     print("at index")
     table = dict(request.GET.lists())
-    if(len(table) == 0):
-        table['view'] = ["Rules"]
     if(table.get('reset',False)):
         request.session.clear()
-    quer = "SELECT TOP(1000) * FROM "
+    quer = """  
+  SELECT * 
+  FROM(
+  SELECT A.SMRULENM_RuleName,
+  A.SMRULE#_RuleNumber, 
+  A.SMRULESEQ_RuleSequence,
+  A.SMID_SqlId,
+  ROW_NUMBER() OVER(PARTITION BY A.SMRULENM_RuleName ORDER BY A.SMRULENM_RuleName DESC) rn
+  FROM OS.ZMPSTSP_OrderStatusRules A 
+)B
+Where rn = 1
+"""
     columns = []
-    view = "Rules"
     objs = None
     asc = []
     desc = []
@@ -36,79 +44,90 @@ def index(request):
         request.session['asc'] = asc
         request.session['desc'] = desc
     for keys in table:
-        if(getattr(Master, keys, False)):
+        if(getattr(Rules, keys, False)):
             search.append([keys,table[keys]])
     
-    if(table.get('view',['master'])[0] != "rules"):
+    if(True):
         quer+= ' '
         print(search)
         for i,member in enumerate(search):
-            if(i == 0):
-                quer += 'WHERE ' + Master._meta.get_field(member[0]).column + ' LIKE ' + "'%%" + member[1][0] + "%%'"            
+            if(i== 0):
+                quer += 'WHERE '  + Rules._meta.get_field(member[0]).column + ' LIKE ' + " '%%" + member[1][0] + "%%' " 
             else:
-                quer += 'AND '  + Master._meta.get_field(member[0]).column + ' LIKE ' + " '%%" + member[1][0] + "%%' " 
+                quer += 'AND '  + Rules._meta.get_field(member[0]).column + ' LIKE ' + " '%%" + member[1][0] + "%%' " 
         if(len(asc) == 0 and len(desc) == 0):
-            quer+= ' ORDER BY ACNAME_AccrualName'
+            quer+= ' ORDER BY 1'
         else:
             quer+=' ORDER BY '
             for i,member in enumerate(asc):
                 print(member)
                 if(i == 0):
-                    quer += Master._meta.get_field(member).column + ' ASC'
+                    quer += Rules._meta.get_field(member).column + ' ASC'
                 else:
-                    quer += ", " + Master._meta.get_field(member).column + ' ASC'
+                    quer += ", " + Rules._meta.get_field(member).column + ' ASC'
             for i,member in enumerate(desc):
                 if(i == 0 and len(asc) == 0):
-                    quer += Master._meta.get_field(member).column + ' DESC'
+                    quer += Rules._meta.get_field(member).column + ' DESC'
                 else:
-                    quer += ", " + Master._meta.get_field(member).column + ' DESC'
+                    quer += ", " + Rules._meta.get_field(member).column + ' DESC'
 
-        columns = [ i.name for i in Master._meta.get_fields()]
-        objs = Master.objects.using('Accrual').raw(quer)
+        columns = [ i.name for i in Rules._meta.get_fields()]
+        objs = Rules.objects.using('Accrual').raw(quer)
     else:
-        quer+= 'ACR.ZACRRULP_AccrualRules ORDER BY ARName_RuleName,ARRULE#_RuleNumber,ARRULESEQ_RuleSequence'
-        columns = [ i.name for i in AccrualR._meta.get_fields()]
-        view = "rules"
+        quer+= '[OS].[ZMPSTSP_OrderStatusRules] ORDER BY SMRULENM_RuleName,SMRULE#_RuleNumber,SMRULESEQ_RuleSequence'
+        columns = [ i.name for i in Rules._meta.get_fields()]
         print(quer)
-        objs = AccrualR.objects.using('Accrual').raw(quer)
+        objs = Rules.objects.using('Accrual').raw(quer)
     
     
     response = []
     for row in objs:
         data = {}
         for i in range(0,len(columns)):
-            field_object = Master._meta.get_field(columns[i]) if view == "definition" else AccrualR._meta.get_field(columns[i])
+            field_object = Rules._meta.get_field(columns[i])
             data[columns[i]] = field_object.value_from_object(row).rstrip() if isinstance(field_object.value_from_object(row), str) else field_object.value_from_object(row)
         response.append(data)
-        
+    '''    
     quer = "  SELECT A.CANAME, MAXS, A.CAPRCS FROM BIDIR.ZMDACDFP A JOIN(SELECT B.CANAME, MAX(CAST(TRIM(substring(B.CAID,4, LEN(B.CAID))) AS INT)) AS MAXS FROM BIDIR.ZMDACDFP B GROUP BY B.CANAME) B ON  A.CANAME=B.CANAME WHERE A.CAID = 'PIM' + CAST(MAXS AS VARCHAR) AND CAPRCS = 'E'"
     tempobjs = Temp.objects.using('Error').raw(quer)
     errorlists = []
     for row in tempobjs:
         errorlists.append(Temp._meta.get_field("CANAME").value_from_object(row).rstrip())
     print(errorlists)
+    
     dropdowns= {
     "AccrualType" : [ i.entry_name for i in Dropdown.objects.filter(view_name="AccrualType")],
     "Definition" : [i.AccrualName.rstrip() for i in Master.objects.all()],
     "Operator" : [[i.entry_name,i.value_name] for i in Dropdown.objects.filter(view_name="Operator")],
     "TestObject" : [[i.entry_name,i.value_name] for i in Dropdown.objects.filter(view_name="TestObject")]
+    }   
+    '''
+    
+    master = Master.objects.all()
+    dropdowns = {
+    "Definition" : {i.RuleName.rstrip() for i in Rules.objects.all()}
+    
     }
-    
-    
+    print(master)
+    columns = columns[0:4]
+    othercols = [i.name for i in Master._meta.get_fields()]
+    response  = [{key: value for key,value in i.items() if key in ['RuleName','RuleNumber','RuleSequence','SQL_ID']} for i in response]
     context = {
     "alldata" : response,
     "cols" : columns,
-    "view" : view,
     "dropdown" : dropdowns,
-    "errors" : errorlists
+    "master" : master,
+    "othercols" : othercols
+    #"errors" : errorlists
     }
-    if(view == "definition"):
-        response = AccrualR.objects.all().values()
+    if(True):
+        response = Rules.objects.all().values()
     target = table.get('queryrule')
     if(target == None):
         target = response[0]["RuleName"]
     if(isinstance(target,list)):
         target = target[0]
+    print(target)
     context["target"] = target.rstrip()
     conditions = defaultdict(list)
     for i in response:
@@ -121,7 +140,7 @@ def index(request):
         context["nextrule"] = max(k for k, v in conditions.items())+1
     else:
         context["nextrule"] = 1
-    return render(request,'accruals\\index.html',context)
+    return render(request,'orders\\index.html',context)
     
     
 def validate(request):
@@ -286,7 +305,7 @@ def updatevalidatepost(request):
             request.session['error'] = True
             request.session['message'] = "Error: Form Submitted with empty values"
             return validateupdate(request)
-    print(request.POST.lists())
+    print(request.POST.lists()) 
     if(Master.objects.filter(AccrualName=data[0]).exists()):
         query = Master.objects.filter(AccrualName=data[0]).values()[0] if view == "definition" else AccrualR.objects.filter(RuleName=data[0]).values()[0]
         j=0
