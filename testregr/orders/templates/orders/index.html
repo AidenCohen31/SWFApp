@@ -806,7 +806,7 @@ tr:first-child {
   {%endfor%}
   </tr>
 
-  {%endfor%}
+  {%endfor%}	
     <tr>
   <th scope="col"> </th>
   <th scope="col"><button name="{{nextrule}}" class="btn btn-primary rule-button" type="button">Add Rule {{nextrule}} </button></th>
@@ -820,7 +820,7 @@ tr:first-child {
 </div>
 
 <div class="table-container" style = "width:40%;">
-<table style="table-layout: auto; width:200%;">
+<table class="table"style="table-layout: auto; width:200%;">
 <thead>
 {%for i in othercols%}
 <th scope="col"> {{i}} </th>
@@ -831,7 +831,6 @@ tr:first-child {
  {% for data in master %}
  
  <tr>
-
   {%for key,value in data.items%}
 
     <td>{{value}}</td>

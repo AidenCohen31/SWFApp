@@ -1110,7 +1110,7 @@ if(lists.eq(i).text().match(regex) != null){
 otherlists.eq(i).val("")
 }
 else{
-otherlists.eq(i).val(lists.eq(i).text());
+otherlists.eq(i).val( parseFloat(lists.eq(i).text(),10) * 100);
 }
 }
 else{

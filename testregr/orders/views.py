@@ -12,6 +12,19 @@ from collections import defaultdict
 from django.db.models import Max
 # Create your views here.
 
+def getField(objs,columns,switch):
+    response = []
+    for row in objs:
+        data = {}
+        for i in range(0,len(columns)):
+            if(switch == "Rules"):
+                field_object = Rules._meta.get_field(columns[i])
+            else:
+                field_object = Master._meta.get_field(columns[i])
+
+            data[columns[i]] = field_object.value_from_object(row).rstrip() if isinstance(field_object.value_from_object(row), str) else field_object.value_from_object(row)
+        response.append(data)
+    return response
 def index(request):
     #store sorts and stuff in sessions
     print("at index")
@@ -80,13 +93,7 @@ Where rn = 1
         objs = Rules.objects.using('Accrual').raw(quer)
     
     
-    response = []
-    for row in objs:
-        data = {}
-        for i in range(0,len(columns)):
-            field_object = Rules._meta.get_field(columns[i])
-            data[columns[i]] = field_object.value_from_object(row).rstrip() if isinstance(field_object.value_from_object(row), str) else field_object.value_from_object(row)
-        response.append(data)
+    response = getField(objs,columns, "Rules")
     '''    
     quer = "  SELECT A.CANAME, MAXS, A.CAPRCS FROM BIDIR.ZMDACDFP A JOIN(SELECT B.CANAME, MAX(CAST(TRIM(substring(B.CAID,4, LEN(B.CAID))) AS INT)) AS MAXS FROM BIDIR.ZMDACDFP B GROUP BY B.CANAME) B ON  A.CANAME=B.CANAME WHERE A.CAID = 'PIM' + CAST(MAXS AS VARCHAR) AND CAPRCS = 'E'"
     tempobjs = Temp.objects.using('Error').raw(quer)
@@ -102,13 +109,12 @@ Where rn = 1
     "TestObject" : [[i.entry_name,i.value_name] for i in Dropdown.objects.filter(view_name="TestObject")]
     }   
     '''
-    
-    master = Master.objects.all()
+    columns2 = [i.name for i in Master._meta.get_fields()]
+    master = getField(Master.objects.all(),columns2, "")
     dropdowns = {
     "Definition" : {i.RuleName.rstrip() for i in Rules.objects.all()}
     
     }
-    print(master)
     columns = columns[0:4]
     othercols = [i.name for i in Master._meta.get_fields()]
     response  = [{key: value for key,value in i.items() if key in ['RuleName','RuleNumber','RuleSequence','SQL_ID']} for i in response]

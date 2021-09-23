@@ -126,20 +126,26 @@ def index(request):
     
     
 def validate(request):
+    print("hi")
     data = dict(request.POST.lists()).get("data[]")
     if(dict(request.POST.lists()).get("view")[0] != "rules"): 
         returndict = {0: ["accName",[]],
+                      1: ["accType",[]],
                       2: ["Indate",[]],
                       3: ["Outdate",[]],
+                      4:["upInvbydate",[]],
                       5: ["amtline",[]],
                       6: ["amtunit", []],
                       7: ["costpercent",[]],
                       8: ["pricepercent",[]],
                       10:["annual",[]],
-                      9:["monthly",[]]}
+                      9:["monthly",[]],
+                      11: ["from",[]],
+                      12: ["to",[]]}
        
         if(request.session.get('error',False)):
-                returndict[0][1].append("Error: Form Submitted with empty values")
+                for i in request.session['nums'].split(","):
+                    returndict[int(i)][1].append("Error: Form Submitted with empty values")
                 request.session['error'] = False
         if(data[0] != ""):
             quer = AccrualD.objects.using('Accrual').filter(AccrualName__iexact=data[0])
@@ -173,12 +179,15 @@ def validate(request):
         returndict = {
         1:["rulenum",[]],
         2:["ruleseq",[]],
+        3:["testobj",[]],
+        7:["op",[]],
         8:["tstval",[]],
         9:["Indaterul",[]],
         10:["Outdaterul",[]]
         }
         if(request.session.get('error',False)):
-                returndict[1][1].append("Error: Form Submitted with empty values")
+                for i in request.session['nums'].split(","):
+                    returndict[int(i)][1].append("Error: Form Submitted with empty values")
                 request.session['error'] = False
                 
         if(data[1] != "" and not data[1].replace('.','').isnumeric()):
@@ -242,7 +251,11 @@ def insert(request):
                 strs = data[j]
                 data[j] = strs.replace("-","")
             if(i.name == "SQL_ID"):
-                print("hi")
+                pass
+            if(i.name == "InvoiceByDate" and data[j] == ""):
+                data[j] = "0"
+            elif(i.name == "InvoiceByDate"):
+                data[j] = data[j].replace("-","")
             elif(j >= len(data) or data[j] == ""):
                 if(i.get_internal_type() == "DecimalField" or i.get_internal_type =="IntegerField"):
                     setattr(objs,i.name,0)
@@ -263,16 +276,24 @@ def insert(request):
 def validatepost(request):
     data = dict(request.POST.lists()).get("data[]")
     view = dict(request.POST.lists()).get("view")[0]
+    bad = False
     if( checklength(data[5:9],"") == 4):
         request.session['error'] = True
         request.session['message'] = "Error: Form Submitted with empty values"
-        return validateupdate(request)
-    exclude = [5,6,7,8] if view == "definition" else [4,5,6]
+        request.session['nums'] = "5,6,7,8"
+        bad = True
+    exclude = [4,5,6,7,8] if view == "definition" else [4,5,6]
     print(data)
     for i in range(len(data)):
         if(data[i] == "" and not i in exclude):
             request.session['error'] = True
-            return validate(request)
+            request.session['message'] = "Error: Form Submitted with empty values"
+            if(request.session.get('nums',False)):
+                request.session['nums'] += ',' + str(i)
+            else:
+                request.session['nums'] = str(i)
+    if(request.session.get('error',False)):
+        return validate(request)
     return JsonResponse({})
 
 
@@ -280,28 +301,35 @@ def validatepost(request):
 def updatevalidatepost(request):
     data = dict(request.POST.lists()).get("data[]")
     view = dict(request.POST.lists()).get("view")[0]
-    exclude = [5,6,7,8] if view == "definition" else [4,5,6]
+    exclude = [4,5,6,7,8] if view == "definition" else [4,5,6]
     print(data)
     if( checklength(data[5:9],"") == 4):
         request.session['error'] = True
         request.session['message'] = "Error: Form Submitted with empty values"
-        return validateupdate(request)
+        request.session['nums'] = '4,5,6,7,8'
     for i in range(len(data)):
         if(data[i] == "" and not i in exclude):
-            print(i)
             request.session['error'] = True
             request.session['message'] = "Error: Form Submitted with empty values"
-            return validateupdate(request)
-    print(request.POST.lists())
+            if(request.session.get('nums',False)):
+                request.session['nums'] += ',' + str(i)
+            else:
+                request.session['nums'] = str(i)
+    if(request.session.get('error',False)):
+        return validate(request)
     if(AccrualD.objects.filter(AccrualName=data[0]).exists()):
         query = AccrualD.objects.filter(AccrualName=data[0]).values()[0] if view == "definition" else AccrualR.objects.filter(RuleName=data[0]).values()[0]
         j=0
         boolvar = True
         arr = AccrualD._meta.get_fields() if view == "definition" else AccrualR._meta.get_fields()
         for i in arr:
-            if(i.name == "InEffectiveDate" or i.name =="OutEffectiveDate" or i.name == "InvoiceByDate"):
+            if(i.name == "InEffectiveDate" or i.name =="OutEffectiveDate"):
                 strs = data[j]
                 data[j] = strs.replace("-","")
+            if(i.name == "InvoiceByDate" and data[j] == ""):
+                data[j] = "0"
+            elif(i.name == "InvoiceByDate"):
+                data[j] = data[j].replace("-","")
             if(isinstance(query[i.name], decimal.Decimal)):
                 if(data[j] == ""):
                     data[j] = "0"
@@ -327,18 +355,22 @@ def validateupdate(request):
     data = dict(request.POST.lists()).get("data[]")
     if(dict(request.POST.lists()).get("view")[0] != "rules"): 
         returndict = {0: ["accNameUpdate",[]],
+                      1: ["accTypeUpdate",[]],
                       2: ["IndateUpdate",[]],
                       3: ["OutdateUpdate",[]],
                       5: ["amtlineUpdate",[]],
                       6: ["amtunitUpdate", []],
                       7: ["costpercentUpdate",[]],
                       8: ["pricepercentUpdate",[]],
-                      10    :["annualUpdate",[]],
-                      9:["monthlyUpdate",[]]}
+                      10:["annualUpdate",[]],
+                      9:["monthlyUpdate",[]],
+                      11:["fromUpdate",[]],
+                      12:["toUpdate",[]]}
         if(request.session.get('error',False)):
-                returndict[0][1].append(request.session['message'])
+            for i in request.session['nums'].split(","):
+                returndict[int(i)][1].append("Error: Form Submitted with empty values")
                 request.session['error'] = False
-                return JsonResponse(returndict)
+            return JsonResponse(returndict)
         if(data[0] != ""):
             quer = AccrualD.objects.using('Accrual').filter(AccrualName=data[0])
             if quer.count() > 1 or ( quer.count() == 1 and quer.first().pk != int(data[-1])):
@@ -357,6 +389,10 @@ def validateupdate(request):
             returndict[7][1].append("Error: percent of cost is too big")
         if(data[8] != "" and (float(data[8])/100 >= 10  or float(data[8])/100 <= -10)):
             returndict[8][1].append("Error: percent of price is too big")
+        if(data[7] != "" and round(float(data[7])/100,2) == 0.0 ):
+            returndict[7][1].append("Error: percent of cost is too small")
+        if(data[8] != "" and  round(float(data[8])/100,2) == 0.0):
+            returndict[8][1].append("Error: percent of price is too small")
         if(checklength(data[5:9],"") < 3):
             returndict[5][1].append("Error: Only 1/4 fields can be specified")
             returndict[6][1].append("Error: Only 1/4 fields can be specified")
@@ -371,6 +407,8 @@ def validateupdate(request):
         returndict = {
         1:["uprulenum",[]],
         2:["upruleseq",[]],
+        3:["uptestobj",[]],
+        7:["upop",[]],
         8:["uptstval",[]],
         9:["upIndaterul",[]],
         10:["upoutdaterul",[]]
@@ -407,8 +445,11 @@ def update(request):
         objs = AccrualD()
         j = 0
         for i in AccrualD._meta.get_fields():
-                
-            if(i.name == "InEffectiveDate" or i.name =="OutEffectiveDate" or i.name == "InvoiceByDate"):
+            if(i.name == "InvoiceByDate" and data[j] == ""):
+                data[j] = "0"
+            elif(i.name == "InvoiceByDate"):
+                data[j] = data[j].replace("-","")
+            if(i.name == "InEffectiveDate" or i.name =="OutEffectiveDate"):
                 strs = data[j]
                 data[j] = strs.replace("-","")
             if(i.name == "CostPercent" or i.name == "PricePercent"):
@@ -540,10 +581,14 @@ def files(request):
                 j = 0
                 for i in AccrualD._meta.get_fields():
                     print(i.name == "InEffectiveDate")
-                    if(i.name == "InEffectiveDate" or i.name =="OutEffectiveDate" or i.name == "InvoiceByDate"):
+                    if(i.name == "InEffectiveDate" or i.name =="OutEffectiveDate"):
                         strs = data[j]
                         data[j] = strs.replace("-","")
                         print(data[j])
+                    if(i.name == "InvoiceByDate" and data[j] == ""):
+                        data[j] = "0"
+                    elif(i.name == "InvoiceByDate"):
+                        data[j] = data[j].replace("-","")
                     if(i.name == "SQL_ID"):
                         quer = AccrualD.objects.using('Accrual').filter(SQL_ID=data[j])
                         if quer.exists():
