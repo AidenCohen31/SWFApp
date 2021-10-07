@@ -126,6 +126,7 @@ Where rn = 1
     "othercols" : othercols
     #"errors" : errorlists
     }
+    print(table.get('queryrule'))
     if(True):
         response = Rules.objects.all().values()
     target = table.get('queryrule')
@@ -146,6 +147,7 @@ Where rn = 1
         context["nextrule"] = max(k for k, v in conditions.items())+1
     else:
         context["nextrule"] = 1
+    print(context["target"])
     return render(request,'orders\\index.html',context)
     
     
@@ -312,8 +314,8 @@ def updatevalidatepost(request):
             request.session['message'] = "Error: Form Submitted with empty values"
             return validateupdate(request)
     print(request.POST.lists()) 
-    if(Master.objects.filter(AccrualName=data[0]).exists()):
-        query = Master.objects.filter(AccrualName=data[0]).values()[0] if view == "definition" else AccrualR.objects.filter(RuleName=data[0]).values()[0]
+    if(Master.objects.filter(SQL_ID=data[0]).exists()):
+        query = Master.objects.filter(SQL_ID=data[0]).values()[0] if view == "definition" else AccrualR.objects.filter(RuleName=data[0]).values()[0]
         j=0
         boolvar = True
         arr = Master._meta.get_fields() if view == "definition" else AccrualR._meta.get_fields()
@@ -359,7 +361,7 @@ def validateupdate(request):
                 request.session['error'] = False
                 return JsonResponse(returndict)
         if(data[0] != ""):
-            quer = Master.objects.using('Accrual').filter(AccrualName=data[0])
+            quer = Master.objects.using('Accrual').filter(SQL_ID=data[0])
             if quer.count() > 1 or ( quer.count() == 1 and quer.first().pk != int(data[-1])):
                 returndict[0][1].append("Error: Duplicate Accrual name")
         if( data[2] != "" and data[3] != "" and int(data[2].replace("-","")) > int(data[3].replace("-",""))):

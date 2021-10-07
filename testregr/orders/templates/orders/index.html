@@ -894,11 +894,9 @@ $(document).ready(function () {
 });
 
 $(".table-name").each(function(index){
-console.log("{{target}}")
 if($(this).children().eq(1).text().trim() == "{{target}}"){	
 clickedele = $(this)
 $(this).css("background-color","#3aafdc")
-console.log("hello")
 $(".table-container").get(0).scroll(0,$(this).get(0).getBoundingClientRect().top-200)
 }
 }
@@ -1111,7 +1109,7 @@ if($(this).css("background-color") == "rgba(0, 0, 0, 0)")
 {
 clickedele = $(this)
 $(".table-name").css("background-color","");
-$("#ruleselect").val($(this).children().eq(0).text().trim())
+$("#ruleselect").val($(this).children().eq(1).text().trim())
 $("#ruleselect").trigger("change");
 }
 else{
@@ -1394,6 +1392,7 @@ $("#ruleseq").val("1");
 
 $("#ruleselect").change(function(e){
 
+
 if($(this).val() != "{{queryrule}}" && $(this).val() !== null)
 {
 let view = "definition";
@@ -1413,19 +1412,17 @@ params[entry[0]] = (entry[0] in params ? params[entry[0]] : [entry[1]] )
 $.ajax({
 type:"GET",
 data: params,
-url:"/accruals/"
+url:"/orders/"
 }).done(function(data){
-temphtml = $($.parseHTML(data)).find('.container .table')
-
-
-$(".container .table").html(temphtml.html())
-
+temphtml = $($.parseHTML(data)).find('.rules-container table.table')
+$(".rules-container table.table").html(temphtml.html())
 let url = new URL('',window.location.href);
 url.search = new URLSearchParams(params).toString();
 window.history.pushState("","load",url.href);
 $(clickedele).css("background-color","#3aafdc");
 
 })
+
 }
 
 });
