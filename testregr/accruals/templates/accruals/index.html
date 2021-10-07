@@ -1403,7 +1403,7 @@ $(clickedele).css("background-color","#3aafdc");
 });
 
 
-$(".table_row").click(function(e){
+$(document).on('click',".table_row",function(e){
 $(".table_row").css("background-color","")
 $(this).css("background-color","#3aafdc")
 $("#update-modal").css("display","block");
